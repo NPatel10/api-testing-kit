@@ -7,6 +7,8 @@ import (
 
 	"api-testing-kit/server/internal/auth"
 	"api-testing-kit/server/internal/collections"
+	"api-testing-kit/server/internal/history"
+	"api-testing-kit/server/internal/requests"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -15,6 +17,8 @@ type Store struct {
 	pool           *pgxpool.Pool
 	Auth           auth.Repository
 	Collections    collections.Repository
+	SavedRequests  requests.Repository
+	History        history.Repository
 	Templates      *TemplateRepository
 	Usage          *UsageRepository
 	Abuse          *AbuseRepository
@@ -60,6 +64,8 @@ func NewStore(pool *pgxpool.Pool) *Store {
 		pool:           pool,
 		Auth:           NewAuthRepository(pool),
 		Collections:    NewCollectionRepository(pool),
+		SavedRequests:  NewSavedRequestRepository(pool),
+		History:        NewRequestHistoryRepository(pool),
 		Templates:      NewTemplateRepository(pool),
 		Usage:          NewUsageRepository(pool),
 		Abuse:          NewAbuseRepository(pool),

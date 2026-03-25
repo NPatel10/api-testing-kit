@@ -8,6 +8,8 @@ import (
 	"api-testing-kit/server/internal/auth"
 	"api-testing-kit/server/internal/collections"
 	"api-testing-kit/server/internal/db"
+	"api-testing-kit/server/internal/history"
+	"api-testing-kit/server/internal/requests"
 	"api-testing-kit/server/internal/templates"
 )
 
@@ -29,6 +31,7 @@ func NewRouter(deps RouterDeps) http.Handler {
 	registerTemplateRoutes(mux)
 	registerAuthRoutes(mux, deps)
 	registerCollectionRoutes(mux, deps)
+	registerSavedRequestRoutes(mux, deps)
 
 	return mux
 }
@@ -100,6 +103,22 @@ func registerCollectionRoutes(mux *http.ServeMux, deps RouterDeps) {
 	}
 
 	NewCollectionsHandler(service, authService).Register(mux)
+}
+
+func registerSavedRequestRoutes(mux *http.ServeMux, deps RouterDeps) {
+	var requestsService *requests.Service
+	var historyService *history.Service
+	authService := deps.Auth
+	if authService == nil && deps.Store != nil && deps.Store.Auth != nil {
+		authService = auth.NewService(deps.Store.Auth)
+	}
+	if deps.Store != nil && deps.Store.SavedRequests != nil {
+		requestsService = requests.NewService(deps.Store.SavedRequests)
+	}
+	if deps.Store != nil && deps.Store.History != nil {
+		historyService = history.NewService(deps.Store.History)
+	}
+	NewRequestsHandler(requestsService, historyService, authService).Register(mux)
 }
 
 func writeJSON(w http.ResponseWriter, status int, payload any) {
