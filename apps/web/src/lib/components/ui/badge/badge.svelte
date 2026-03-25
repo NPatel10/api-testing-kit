@@ -2,14 +2,15 @@
 	import { type VariantProps, tv } from "tailwind-variants";
 
 	export const badgeVariants = tv({
-		base: "h-5 gap-1 rounded-4xl border border-transparent px-2 py-0.5 text-xs font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive group/badge inline-flex w-fit shrink-0 items-center justify-center overflow-hidden whitespace-nowrap transition-colors focus-visible:ring-[3px] [&>svg]:pointer-events-none",
+		base: "group/badge inline-flex w-fit shrink-0 items-center justify-center overflow-hidden whitespace-nowrap rounded-full border border-transparent px-2.5 py-1 text-xs font-medium transition-all focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:border-danger aria-invalid:ring-danger/20 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:pointer-events-none [&>svg]:size-3!",
 		variants: {
 			variant: {
-				default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
-				secondary: "bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80",
-				destructive: "bg-destructive/10 [a]:hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 text-destructive dark:bg-destructive/20",
-				outline: "border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground",
-				ghost: "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
+				default: "bg-primary text-primary-foreground shadow-[0_8px_18px_rgba(31,122,77,0.16)] [a]:hover:bg-primary/90",
+				secondary: "border-border bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80",
+				destructive:
+					"border border-danger/15 bg-danger/10 text-danger [a]:hover:bg-danger/15 focus-visible:ring-danger/20",
+				outline: "border-border bg-surface text-text-strong [a]:hover:bg-surface-soft [a]:hover:text-text-strong",
+				ghost: "bg-transparent text-text-body hover:bg-surface-soft hover:text-text-strong",
 				link: "text-primary underline-offset-4 hover:underline",
 			},
 		},
