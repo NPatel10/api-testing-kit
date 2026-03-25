@@ -78,6 +78,7 @@ Copy values from `.env.example` before local development.
 Current variables:
 
 ```bash
+INTERNAL_API_BASE_URL=http://api:8080
 PUBLIC_API_BASE_URL=http://localhost:8080
 API_PORT=8080
 WEB_PORT=4173
@@ -101,6 +102,8 @@ The stack exposes:
 - `http://localhost:4173` for the web app
 - `http://localhost:8080` for the Go API
 - `localhost:5432` for PostgreSQL
+
+The web container uses `INTERNAL_API_BASE_URL` for server-side fetches so SvelteKit can reach the API container directly, while `PUBLIC_API_BASE_URL` remains host-friendly for browser links and local non-Docker development.
 
 PostgreSQL bootstrap SQL lives in `docker/postgres/init/001-bootstrap.sql`.
 Goose migrations should be added under `server/migrations`, then run with:
