@@ -1,4 +1,5 @@
-import { env } from "$env/dynamic/public";
+import { env as privateEnv } from "$env/dynamic/private";
+import { env as publicEnv } from "$env/dynamic/public";
 import type { PageServerLoad } from "./$types";
 
 import {
@@ -20,7 +21,9 @@ async function loadTemplates(fetchFn: typeof fetch): Promise<{
 	templates: TemplatesPageTemplate[];
 	sourceLabel: string;
 }> {
-	const baseUrl = normalizeBaseUrl(env.PUBLIC_API_BASE_URL);
+	const baseUrl = normalizeBaseUrl(
+		privateEnv.INTERNAL_API_BASE_URL || privateEnv.API_BASE_URL || publicEnv.PUBLIC_API_BASE_URL,
+	);
 
 	try {
 		const response = await fetchFn(`${baseUrl}/api/v1/templates`, {
