@@ -10,6 +10,8 @@ import (
 	"api-testing-kit/server/internal/db"
 	"api-testing-kit/server/internal/history"
 	"api-testing-kit/server/internal/requests"
+	"api-testing-kit/server/internal/runner"
+	"api-testing-kit/server/internal/safety"
 	"api-testing-kit/server/internal/templates"
 )
 
@@ -32,6 +34,7 @@ func NewRouter(deps RouterDeps) http.Handler {
 	registerAuthRoutes(mux, deps)
 	registerCollectionRoutes(mux, deps)
 	registerSavedRequestRoutes(mux, deps)
+	registerRunRoutes(mux, deps)
 
 	return mux
 }
@@ -119,6 +122,19 @@ func registerSavedRequestRoutes(mux *http.ServeMux, deps RouterDeps) {
 		historyService = history.NewService(deps.Store.History)
 	}
 	NewRequestsHandler(requestsService, historyService, authService).Register(mux)
+}
+
+func registerRunRoutes(mux *http.ServeMux, deps RouterDeps) {
+	var historyService *history.Service
+	authService := deps.Auth
+	if authService == nil && deps.Store != nil && deps.Store.Auth != nil {
+		authService = auth.NewService(deps.Store.Auth)
+	}
+	if deps.Store != nil && deps.Store.History != nil {
+		historyService = history.NewService(deps.Store.History)
+	}
+	runnerService := runner.NewService(nil, historyService, safety.DefaultOptions())
+	NewRunsHandler(runnerService, authService).Register(mux)
 }
 
 func writeJSON(w http.ResponseWriter, status int, payload any) {
