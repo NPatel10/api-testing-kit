@@ -154,9 +154,9 @@
 									<PlayIcon class="size-4" />
 									Open /app
 								</Button>
-								<Button href="/templates" variant="outline" size="lg" class="rounded-full border-border bg-white px-6">
+								<Button href="/features" variant="outline" size="lg" class="rounded-full border-border bg-white px-6">
 									<SparklesIcon class="size-4" />
-									See templates
+									Review features
 								</Button>
 							</div>
 
