@@ -448,6 +448,7 @@ Depends on:
 
 ### F2. Templates Page
 Owner: `Agent Group F`
+Status: `completed` on `2026-03-25`
 
 Scope:
 - Build template browsing and category filters.
