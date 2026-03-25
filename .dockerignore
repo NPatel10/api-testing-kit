@@ -1,0 +1,14 @@
+.git
+.gitignore
+.vscode
+**/.DS_Store
+**/Thumbs.db
+**/node_modules
+**/.svelte-kit
+**/build
+**/.output
+**/playwright-report
+**/test-results
+server/bin
+*.test
+*.out
