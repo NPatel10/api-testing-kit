@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"api-testing-kit/server/internal/auth"
+	"api-testing-kit/server/internal/collections"
 	"api-testing-kit/server/internal/db"
 	"api-testing-kit/server/internal/templates"
 )
@@ -27,6 +28,7 @@ func NewRouter(deps RouterDeps) http.Handler {
 	registerCoreRoutes(mux)
 	registerTemplateRoutes(mux)
 	registerAuthRoutes(mux, deps)
+	registerCollectionRoutes(mux, deps)
 
 	return mux
 }
@@ -85,6 +87,19 @@ func registerAuthRoutes(mux *http.ServeMux, deps RouterDeps) {
 	}
 
 	NewAuthHandler(service).Register(mux)
+}
+
+func registerCollectionRoutes(mux *http.ServeMux, deps RouterDeps) {
+	var service *collections.Service
+	authService := deps.Auth
+	if authService == nil && deps.Store != nil && deps.Store.Auth != nil {
+		authService = auth.NewService(deps.Store.Auth)
+	}
+	if deps.Store != nil && deps.Store.Collections != nil {
+		service = collections.NewService(deps.Store.Collections)
+	}
+
+	NewCollectionsHandler(service, authService).Register(mux)
 }
 
 func writeJSON(w http.ResponseWriter, status int, payload any) {
