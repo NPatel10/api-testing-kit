@@ -9,9 +9,11 @@
     "check:web": "bun run --cwd ./apps/web check",
     "test:web": "bun run --cwd ./apps/web test",
     "test:web:unit": "bun run --cwd ./apps/web test:unit -- --run",
+    "test:web:smoke": "bun run --cwd ./apps/web test:smoke",
     "test:web:e2e": "bun run --cwd ./apps/web test:e2e",
     "dev:server": "go -C ./server run ./cmd/api",
     "test:server": "go -C ./server test ./...",
+    "test:server:integration": "go -C ./server test ./tests/integration/...",
     "fmt:server": "gofmt -w ./server/cmd ./server/internal",
     "test": "bun run test:web && bun run test:server"
   }
