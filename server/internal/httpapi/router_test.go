@@ -13,7 +13,7 @@ func TestTemplatesList(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/templates", nil)
 	rr := httptest.NewRecorder()
 
-	NewRouter().ServeHTTP(rr, req)
+	NewRouter(RouterDeps{}).ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusOK {
 		t.Fatalf("expected status %d, got %d", http.StatusOK, rr.Code)
@@ -48,7 +48,7 @@ func TestTemplatesDetail(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/templates/weather-demo", nil)
 	rr := httptest.NewRecorder()
 
-	NewRouter().ServeHTTP(rr, req)
+	NewRouter(RouterDeps{}).ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusOK {
 		t.Fatalf("expected status %d, got %d", http.StatusOK, rr.Code)
@@ -90,7 +90,7 @@ func TestTemplatesDetailNotFound(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/templates/does-not-exist", nil)
 	rr := httptest.NewRecorder()
 
-	NewRouter().ServeHTTP(rr, req)
+	NewRouter(RouterDeps{}).ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusNotFound {
 		t.Fatalf("expected status %d, got %d", http.StatusNotFound, rr.Code)

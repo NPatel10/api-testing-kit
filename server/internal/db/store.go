@@ -5,12 +5,20 @@ import (
 	"errors"
 	"time"
 
+	"api-testing-kit/server/internal/auth"
+	"api-testing-kit/server/internal/collections"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Store struct {
-	pool      *pgxpool.Pool
-	Templates *TemplateRepository
+	pool           *pgxpool.Pool
+	Auth           auth.Repository
+	Collections    collections.Repository
+	Templates      *TemplateRepository
+	Usage          *UsageRepository
+	Abuse          *AbuseRepository
+	BlockedTargets *BlockedTargetRepository
 }
 
 func Open(ctx context.Context, databaseURL string, maxConns int32) (*Store, error) {
@@ -49,8 +57,13 @@ func NewStore(pool *pgxpool.Pool) *Store {
 	}
 
 	return &Store{
-		pool:      pool,
-		Templates: NewTemplateRepository(pool),
+		pool:           pool,
+		Auth:           NewAuthRepository(pool),
+		Collections:    NewCollectionRepository(pool),
+		Templates:      NewTemplateRepository(pool),
+		Usage:          NewUsageRepository(pool),
+		Abuse:          NewAbuseRepository(pool),
+		BlockedTargets: NewBlockedTargetRepository(pool),
 	}
 }
 
