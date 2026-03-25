@@ -5,11 +5,14 @@ import (
 	"errors"
 	"time"
 
+	"api-testing-kit/server/internal/auth"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Store struct {
 	pool      *pgxpool.Pool
+	Auth      auth.Repository
 	Templates *TemplateRepository
 }
 
@@ -50,6 +53,7 @@ func NewStore(pool *pgxpool.Pool) *Store {
 
 	return &Store{
 		pool:      pool,
+		Auth:      NewAuthRepository(pool),
 		Templates: NewTemplateRepository(pool),
 	}
 }

@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	"api-testing-kit/server/internal/auth"
+	"api-testing-kit/server/internal/db"
 	"api-testing-kit/server/internal/templates"
 )
 
@@ -14,9 +16,22 @@ type healthResponse struct {
 	Timestamp string `json:"timestamp"`
 }
 
-func NewRouter() http.Handler {
+type RouterDeps struct {
+	Store *db.Store
+	Auth  *auth.Service
+}
+
+func NewRouter(deps RouterDeps) http.Handler {
 	mux := http.NewServeMux()
 
+	registerCoreRoutes(mux)
+	registerTemplateRoutes(mux)
+	registerAuthRoutes(mux, deps)
+
+	return mux
+}
+
+func registerCoreRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]string{
 			"message": "API Testing Kit server scaffold is running",
@@ -38,7 +53,9 @@ func NewRouter() http.Handler {
 			Timestamp: time.Now().UTC().Format(time.RFC3339),
 		})
 	})
+}
 
+func registerTemplateRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/v1/templates", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]any{
 			"templates": templates.List(),
@@ -59,8 +76,15 @@ func NewRouter() http.Handler {
 
 		writeJSON(w, http.StatusOK, template)
 	})
+}
 
-	return mux
+func registerAuthRoutes(mux *http.ServeMux, deps RouterDeps) {
+	service := deps.Auth
+	if service == nil && deps.Store != nil && deps.Store.Auth != nil {
+		service = auth.NewService(deps.Store.Auth)
+	}
+
+	NewAuthHandler(service).Register(mux)
 }
 
 func writeJSON(w http.ResponseWriter, status int, payload any) {
