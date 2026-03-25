@@ -70,15 +70,19 @@
 					{@const Icon = item.icon}
 					<SidebarMenuItem>
 						<SidebarMenuButton isActive={item.active} class="justify-between">
-							<span class="flex items-center gap-2">
-								<Icon class="size-4" />
-								<span>{item.label}</span>
-							</span>
-							{#if item.badge}
-								<Badge variant={item.active ? "default" : "outline"} class="ml-auto">
-									{item.badge}
-								</Badge>
-							{/if}
+							{#snippet child({ props })}
+								<a href={item.href} {...props}>
+									<span class="flex items-center gap-2">
+										<Icon class="size-4" />
+										<span>{item.label}</span>
+									</span>
+									{#if item.badge}
+										<Badge variant={item.active ? "default" : "outline"} class="ml-auto">
+											{item.badge}
+										</Badge>
+									{/if}
+								</a>
+							{/snippet}
 						</SidebarMenuButton>
 					</SidebarMenuItem>
 				{/each}
@@ -94,8 +98,12 @@
 					{@const Icon = item.icon}
 					<SidebarMenuItem>
 						<SidebarMenuButton class="justify-start gap-2">
-							<Icon class="size-4" />
-							<span>{item.label}</span>
+							{#snippet child({ props })}
+								<a href={item.href} {...props}>
+									<Icon class="size-4" />
+									<span>{item.label}</span>
+								</a>
+							{/snippet}
 						</SidebarMenuButton>
 					</SidebarMenuItem>
 				{/each}
