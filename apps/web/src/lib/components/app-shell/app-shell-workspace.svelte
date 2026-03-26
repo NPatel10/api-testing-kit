@@ -13,6 +13,7 @@
 		type RequestBodyMode,
 		type RequestBuilderDraft,
 	} from "$lib/components/workspace/request-builder";
+	import { createSavedRequestDraft } from "$lib/components/workspace/saved-request";
 	import ResponseViewer from "$lib/components/workspace/response-viewer.svelte";
 	import type { ResponseHeader } from "$lib/components/workspace/response-viewer";
 	import {
@@ -32,13 +33,15 @@
 		type WorkspaceMode,
 		type WorkspaceTemplate,
 	} from "$lib/mocks/workspace-state";
+	import type { BackendSavedRequest } from "$lib/server/backend";
 
 	type Props = {
 		mode?: WorkspaceMode;
 		entitlements?: EffectiveEntitlements;
+		savedRequest?: BackendSavedRequest | null;
 	};
 
-	let { mode = "guest", entitlements }: Props = $props();
+	let { mode = "guest", entitlements, savedRequest = null }: Props = $props();
 	const workspaceState = $derived(mode === "authenticated" ? authenticatedWorkspaceState : guestWorkspaceState);
 	const previewMode = $derived(page.url.searchParams.get("mode") === "preview");
 	const selectedTemplate = $derived(
@@ -81,12 +84,14 @@
 	} as const;
 
 	const currentSelectionKey = $derived(
-		`${mode}:${previewMode ? "preview" : "live"}:${selectedTemplate?.slug ?? "default"}`,
+		`${mode}:${previewMode ? "preview" : "live"}:${savedRequest?.id ?? selectedTemplate?.slug ?? "default"}`,
 	);
 	const liveResponseState = $derived(liveResponse ?? previewResponse ?? emptyResponse);
 	const liveResponseDescription = $derived(
 		liveResponse
 			? "Latest live response returned from the backend proxy."
+			: savedRequest
+				? "The builder is hydrated from a persisted saved request."
 			: previewResponse
 				? "Preview mode shows the seeded response snapshot for the selected template."
 				: "Live results appear here once you send a request through the backend proxy.",
@@ -200,7 +205,9 @@
 		return draft;
 	}
 
-	const requestDraft = $derived(createTemplateRequestDraft(mode, selectedTemplate));
+	const requestDraft = $derived(
+		savedRequest ? createSavedRequestDraft(mode, savedRequest) : createTemplateRequestDraft(mode, selectedTemplate),
+	);
 
 	const responseHeaders: ResponseHeader[] = $derived(liveResponseState.headers);
 
