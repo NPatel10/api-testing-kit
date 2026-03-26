@@ -350,6 +350,7 @@ Depends on:
 
 ### D3. Guest Restrictions
 Owner: `Agent Group D`
+Status: `completed` on `2026-03-26`
 
 Scope:
 - Enforce allowlisted endpoints for guests on `/app`.

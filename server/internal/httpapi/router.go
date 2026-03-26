@@ -8,6 +8,7 @@ import (
 	"api-testing-kit/server/internal/auth"
 	"api-testing-kit/server/internal/collections"
 	"api-testing-kit/server/internal/db"
+	"api-testing-kit/server/internal/guest"
 	"api-testing-kit/server/internal/history"
 	"api-testing-kit/server/internal/requests"
 	"api-testing-kit/server/internal/runner"
@@ -31,6 +32,7 @@ func NewRouter(deps RouterDeps) http.Handler {
 
 	registerCoreRoutes(mux)
 	registerTemplateRoutes(mux)
+	registerGuestRoutes(mux, deps)
 	registerAuthRoutes(mux, deps)
 	registerCollectionRoutes(mux, deps)
 	registerSavedRequestRoutes(mux, deps)
@@ -93,6 +95,18 @@ func registerAuthRoutes(mux *http.ServeMux, deps RouterDeps) {
 	}
 
 	NewAuthHandler(service).Register(mux)
+}
+
+func registerGuestRoutes(mux *http.ServeMux, deps RouterDeps) {
+	var usageRecorder guest.UsageRecorder
+	var abuseRecorder guest.AbuseRecorder
+	if deps.Store != nil {
+		usageRecorder = deps.Store.Usage
+		abuseRecorder = deps.Store.Abuse
+	}
+
+	service := guest.NewService(nil, nil, usageRecorder, abuseRecorder, safety.DefaultOptions())
+	NewGuestRunsHandler(service).Register(mux)
 }
 
 func registerCollectionRoutes(mux *http.ServeMux, deps RouterDeps) {
