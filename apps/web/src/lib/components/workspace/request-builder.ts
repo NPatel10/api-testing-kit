@@ -84,7 +84,7 @@ export function createDefaultRequestDraft(mode: RequestBuilderMode = "guest"): R
 		url:
 			mode === "guest"
 				? "https://jsonplaceholder.typicode.com/posts/1"
-				: "https://api.example.com/users",
+				: "https://api.github.com/users/octocat",
 		queryParams: [
 			createRequestRow("include", "summary", true),
 			createRequestRow("limit", "10", true),

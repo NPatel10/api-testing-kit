@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from "$app/state";
 	import Badge from "$lib/components/ui/badge/badge.svelte";
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "$lib/components/ui/card/index.js";
 	import GuestAdvancedToolsLock from "$lib/components/workspace/guest-advanced-tools-lock.svelte";
@@ -14,10 +15,23 @@
 	} from "$lib/components/workspace/request-builder";
 	import ResponseViewer from "$lib/components/workspace/response-viewer.svelte";
 	import type { ResponseHeader } from "$lib/components/workspace/response-viewer";
+	import {
+		buildLiveRunPayload,
+		createEmptyViewerState,
+		createPreviewViewerState,
+		createRequestFailureState,
+		readLiveRunViewerState,
+		type LiveRunViewerState,
+	} from "$lib/components/workspace/live-request";
 	import TemplateBrowser from "$lib/components/workspace/template-browser.svelte";
 	import { buildEntitlementRows, getEntitlementSummary, type EffectiveEntitlements } from "$lib/entitlements/access";
-	import { authenticatedWorkspaceState, guestWorkspaceState } from "$lib/mocks/workspace-state";
-	import type { WorkspaceMode } from "$lib/mocks/workspace-state";
+	import {
+		authenticatedWorkspaceState,
+		guestWorkspaceState,
+		type WorkspaceCollectionPreview,
+		type WorkspaceMode,
+		type WorkspaceTemplate,
+	} from "$lib/mocks/workspace-state";
 
 	type Props = {
 		mode?: WorkspaceMode;
@@ -26,7 +40,23 @@
 
 	let { mode = "guest", entitlements }: Props = $props();
 	const workspaceState = $derived(mode === "authenticated" ? authenticatedWorkspaceState : guestWorkspaceState);
-	const primaryTemplate = $derived(workspaceState.templates[0]);
+	const previewMode = $derived(page.url.searchParams.get("mode") === "preview");
+	const selectedTemplate = $derived(
+		selectWorkspaceTemplate(
+			workspaceState.templates,
+			workspaceState.collections,
+			page.url.searchParams.get("template"),
+			page.url.searchParams.get("collection"),
+		),
+	);
+	const previewSnapshot = $derived(selectedTemplate ? buildPreviewSnapshot(selectedTemplate) : null);
+	const previewResponse = $derived(previewMode && previewSnapshot ? createPreviewViewerState(previewSnapshot) : null);
+	const emptyResponse = createEmptyViewerState();
+	let liveResponse = $state<LiveRunViewerState | null>(null);
+	let isSending = $state(false);
+	let activeSelectionKey = "";
+	let requestNonce = 0;
+	let activeAbortController: AbortController | null = null;
 
 	const categoryMap = {
 		"REST basics": "rest-basics",
@@ -50,45 +80,105 @@
 		error: "border-danger/20 bg-danger/10 text-danger",
 	} as const;
 
-	function toRequestBodyMode(mode: string): RequestBodyMode {
-		if (mode === "raw") {
+	const currentSelectionKey = $derived(
+		`${mode}:${previewMode ? "preview" : "live"}:${selectedTemplate?.slug ?? "default"}`,
+	);
+	const liveResponseState = $derived(liveResponse ?? previewResponse ?? emptyResponse);
+	const liveResponseDescription = $derived(
+		liveResponse
+			? "Latest live response returned from the backend proxy."
+			: previewResponse
+				? "Preview mode shows the seeded response snapshot for the selected template."
+				: "Live results appear here once you send a request through the backend proxy.",
+	);
+	const liveEmptyTitle = $derived(
+		isSending ? "Sending request..." : previewMode ? "Preview response pending" : "No request sent yet",
+	);
+	const liveEmptyDescription = $derived(
+		isSending
+			? "The last completed response stays visible while the current run resolves."
+			: previewMode
+				? "Preview mode renders the seeded response snapshot for the selected template."
+				: "Send a request to populate the viewer with a live backend response.",
+	);
+
+	$effect(() => {
+		if (currentSelectionKey === activeSelectionKey) {
+			return;
+		}
+
+		activeSelectionKey = currentSelectionKey;
+		liveResponse = null;
+		isSending = false;
+		activeAbortController?.abort();
+		activeAbortController = null;
+	});
+
+	function toRequestBodyMode(value: string): RequestBodyMode {
+		if (value === "raw") {
 			return "raw";
 		}
 
-		if (mode === "form-urlencoded") {
+		if (value === "form-urlencoded") {
 			return "form";
 		}
 
 		return "json";
 	}
 
-	function createTemplateRequestDraft(currentMode: WorkspaceMode): RequestBuilderDraft {
+	function selectWorkspaceTemplate(
+		templates: readonly WorkspaceTemplate[],
+		collections: readonly WorkspaceCollectionPreview[],
+		templateSlug: string | null,
+		collectionId: string | null,
+	): WorkspaceTemplate | undefined {
+		const explicitTemplate = templateSlug?.trim()
+			? templates.find((template) => template.slug === templateSlug.trim())
+			: undefined;
+		if (explicitTemplate) {
+			return explicitTemplate;
+		}
+
+		const collectionTemplateSlug = collectionId?.trim()
+			? collections
+					.find((collection) => collection.id === collectionId.trim())
+					?.templateSlugs.find((slug) => templates.some((template) => template.slug === slug))
+			: undefined;
+
+		if (collectionTemplateSlug) {
+			return templates.find((template) => template.slug === collectionTemplateSlug);
+		}
+
+		return templates[0];
+	}
+
+	function createTemplateRequestDraft(currentMode: WorkspaceMode, template?: WorkspaceTemplate): RequestBuilderDraft {
 		const draft = createDefaultRequestDraft(currentMode);
 
-		if (!primaryTemplate) {
+		if (!template) {
 			return draft;
 		}
 
-		draft.method = primaryTemplate.request.method;
-		draft.url = primaryTemplate.request.url;
-		draft.queryParams = primaryTemplate.request.query.map((item) => ({
+		draft.method = template.request.method;
+		draft.url = template.request.url;
+		draft.queryParams = template.request.query.map((item) => ({
 			key: item.key,
 			value: item.value,
 			enabled: true,
 		}));
-		draft.headers = primaryTemplate.request.headers.map((item) => ({
+		draft.headers = template.request.headers.map((item) => ({
 			key: item.key,
 			value: item.value,
 			enabled: true,
 		}));
 
-		const bodyMode = toRequestBodyMode(primaryTemplate.request.bodyMode);
+		const bodyMode = toRequestBodyMode(template.request.bodyMode);
 		draft.body = {
 			...draft.body,
 			mode: bodyMode,
 			value:
 				bodyMode === "json"
-					? '{\n  "template": "' + primaryTemplate.slug + '",\n  "preview": true\n}'
+					? '{\n  "template": "' + template.slug + '",\n  "preview": true\n}'
 					: bodyMode === "raw"
 						? "demo-preview-body"
 						: draft.body.value,
@@ -110,17 +200,9 @@
 		return draft;
 	}
 
-	const requestDraft = $derived(createTemplateRequestDraft(mode));
+	const requestDraft = $derived(createTemplateRequestDraft(mode, selectedTemplate));
 
-	const responseHeaders: ResponseHeader[] = $derived(
-		primaryTemplate
-			? [
-					{ key: "content-type", value: primaryTemplate.request.responseContentType },
-					{ key: "x-guest-mode", value: mode === "authenticated" ? "authenticated-template" : "allowlisted-template" },
-					{ key: "x-preview-size", value: primaryTemplate.request.responseSizeLabel },
-				]
-			: []
-	);
+	const responseHeaders: ResponseHeader[] = $derived(liveResponseState.headers);
 
 	const templateBrowserTemplates = $derived(
 		workspaceState.templates.map((template, index) => ({
@@ -155,6 +237,63 @@
 			previewHref: `/app?collection=${collection.id}&mode=preview`,
 		}))
 	);
+
+	async function handleSend(draft: RequestBuilderDraft) {
+		const requestId = ++requestNonce;
+		activeAbortController?.abort();
+		const controller = new AbortController();
+		activeAbortController = controller;
+		isSending = true;
+
+		try {
+			const response = await fetch(getRunEndpoint(mode), {
+				method: "POST",
+				headers: {
+					accept: "application/json",
+					"content-type": "application/json",
+				},
+				body: JSON.stringify(buildLiveRunPayload(draft)),
+				signal: controller.signal,
+			});
+
+			const nextResponse = await readLiveRunViewerState(response);
+			if (requestId === requestNonce) {
+				liveResponse = nextResponse;
+			}
+		} catch (error) {
+			if (requestId !== requestNonce) {
+				return;
+			}
+
+			if (error instanceof DOMException && error.name === "AbortError") {
+				return;
+			}
+
+			liveResponse = createRequestFailureState(error instanceof Error ? error.message : "Unexpected request failure");
+		} finally {
+			if (requestId === requestNonce) {
+				isSending = false;
+				if (activeAbortController === controller) {
+					activeAbortController = null;
+				}
+			}
+		}
+	}
+
+	function buildPreviewSnapshot(template: WorkspaceTemplate) {
+		return {
+			responseStatus: template.request.responseStatus,
+			responseStatusText: template.request.responseStatusText,
+			responseTimeMs: template.request.responseTimeMs,
+			responseSizeLabel: template.request.responseSizeLabel,
+			responseContentType: template.request.responseContentType,
+			responseBody: template.request.responseBody,
+		};
+	}
+
+	function getRunEndpoint(currentMode: WorkspaceMode) {
+		return currentMode === "guest" ? "/api/v1/guest-runs" : "/api/v1/runs";
+	}
 </script>
 
 <section class="space-y-4">
@@ -191,19 +330,25 @@
 			description={workspaceState.accessSummary}
 			request={requestDraft}
 			lockedNote={workspaceState.prompts[0]?.body}
+			pending={isSending}
+			sendLabel={mode === "guest" ? "Send guest request" : "Send request"}
+			onSend={handleSend}
 		/>
 
 		<ResponseViewer
 			title="Response viewer"
-			description={mode === "authenticated" ? "Previewed authenticated responses stay structured, readable, and safe." : "Previewed guest responses stay structured, readable, and visibly constrained."}
-			status={primaryTemplate?.request.responseStatus}
-			statusText={primaryTemplate?.request.responseStatusText}
-			duration={primaryTemplate?.request.responseTimeMs}
-			size={primaryTemplate?.request.responseSizeLabel}
-			contentType={primaryTemplate?.request.responseContentType}
+			description={liveResponseDescription}
+			status={liveResponseState.status}
+			statusText={liveResponseState.statusText}
+			duration={liveResponseState.duration}
+			size={liveResponseState.size}
+			contentType={liveResponseState.contentType}
 			headers={responseHeaders}
-			prettyBody={primaryTemplate?.request.responseBody}
-			rawBody={primaryTemplate?.request.responseBody}
+			prettyBody={liveResponseState.prettyBody}
+			rawBody={liveResponseState.rawBody}
+			error={liveResponseState.error}
+			emptyTitle={liveEmptyTitle}
+			emptyDescription={liveEmptyDescription}
 		/>
 	</div>
 
