@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    name: Web checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.19
+
+      - name: Install web dependencies
+        run: bun install --cwd ./apps/web --frozen-lockfile
+
+      - name: Static checks
+        run: |
+          has_lint=0
+          has_typecheck=0
+
+          if node -e "const scripts = require('./package.json').scripts || {}; process.exit(scripts.lint ? 0 : 1)"; then
+            bun run lint
+            has_lint=1
+          fi
+
+          if node -e "const scripts = require('./package.json').scripts || {}; process.exit(scripts.typecheck ? 0 : 1)"; then
+            bun run typecheck
+            has_typecheck=1
+          fi
+
+          if [ "$has_lint" -eq 0 ] || [ "$has_typecheck" -eq 0 ]; then
+            bun run check:web
+          fi
+
+      - name: Build web app
+        run: bun run build:web
+
+      - name: Run web unit tests
+        run: bun run test:web:unit
+
+  server:
+    name: Server checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.19
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ./server/go.mod
+          cache-dependency-path: ./server/go.sum
+
+      - name: Run server tests
+        run: bun run test:server
