@@ -37,6 +37,13 @@ func TestSavedRequestsAndHistoryHandlers(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("create history failed: %v", err)
 	}
+	if _, err := historyService.Create(context.Background(), history.CreateParams{
+		UserID: authResult.User.ID,
+		Method: "GET",
+		URL:    "https://api.example.com/projects",
+	}); err != nil {
+		t.Fatalf("create second history failed: %v", err)
+	}
 
 	handler := NewRequestsHandler(requests.NewService(requestRepo), historyService, authService)
 	mux := http.NewServeMux()
@@ -75,6 +82,35 @@ func TestSavedRequestsAndHistoryHandlers(t *testing.T) {
 	if historyRR.Code != http.StatusOK {
 		t.Fatalf("expected history status %d, got %d", http.StatusOK, historyRR.Code)
 	}
+
+	filteredReq := httptest.NewRequest(http.MethodGet, "/api/v1/history?status=success&method=GET&domain=api.example.com&page=2&limit=1&date="+time.Now().UTC().Format("2006-01-02"), nil)
+	filteredReq.AddCookie(&http.Cookie{Name: sessionCookieName, Value: authResult.Token})
+	filteredRR := httptest.NewRecorder()
+	mux.ServeHTTP(filteredRR, filteredReq)
+
+	if filteredRR.Code != http.StatusOK {
+		t.Fatalf("expected filtered history status %d, got %d", http.StatusOK, filteredRR.Code)
+	}
+
+	var filteredPayload struct {
+		History    []history.RunRecord    `json:"history"`
+		Pagination history.ListPagination `json:"pagination"`
+	}
+	if err := json.Unmarshal(filteredRR.Body.Bytes(), &filteredPayload); err != nil {
+		t.Fatalf("decode filtered history payload: %v", err)
+	}
+	if len(filteredPayload.History) != 1 {
+		t.Fatalf("expected paginated history to return one item, got %d", len(filteredPayload.History))
+	}
+	if !filteredPayload.Pagination.HasMore || filteredPayload.Pagination.Page != 2 || filteredPayload.Pagination.Limit != 1 {
+		t.Fatalf("unexpected pagination metadata: %+v", filteredPayload.Pagination)
+	}
+	if historyRepo.lastQuery.Status != "success" || historyRepo.lastQuery.Method != "GET" || historyRepo.lastQuery.Domain != "api.example.com" {
+		t.Fatalf("expected history query filters to be forwarded, got %+v", historyRepo.lastQuery)
+	}
+	if historyRepo.lastQuery.Page != 2 || historyRepo.lastQuery.Limit != 2 {
+		t.Fatalf("expected limit to include sentinel row, got %+v", historyRepo.lastQuery)
+	}
 }
 
 type fakeSavedRequestRepo struct {
@@ -92,6 +128,10 @@ func (r *fakeSavedRequestRepo) GetByID(ctx context.Context, id string, ownerUser
 		return requests.SavedRequest{}, requests.ErrNotFound
 	}
 	return item, nil
+}
+
+func (r *fakeSavedRequestRepo) ListByCollection(ctx context.Context, collectionID string, ownerUserID string) ([]requests.SavedRequest, error) {
+	return nil, nil
 }
 
 func (r *fakeSavedRequestRepo) Create(ctx context.Context, params requests.CreateParams) (requests.SavedRequest, error) {
@@ -146,7 +186,8 @@ func (r *fakeSavedRequestRepo) Delete(ctx context.Context, id string, ownerUserI
 }
 
 type fakeHistoryRepo struct {
-	items []history.RunRecord
+	items     []history.RunRecord
+	lastQuery history.ListQuery
 }
 
 func newFakeHistoryRepo() *fakeHistoryRepo {
@@ -154,6 +195,11 @@ func newFakeHistoryRepo() *fakeHistoryRepo {
 }
 
 func (r *fakeHistoryRepo) ListByUser(ctx context.Context, userID string, limit int32) ([]history.RunRecord, error) {
+	return r.items, nil
+}
+
+func (r *fakeHistoryRepo) ListByUserWithFilters(ctx context.Context, query history.ListQuery) ([]history.RunRecord, error) {
+	r.lastQuery = query
 	return r.items, nil
 }
 

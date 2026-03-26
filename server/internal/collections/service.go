@@ -63,6 +63,7 @@ type UpdateParams struct {
 
 type Repository interface {
 	ListByOwner(ctx context.Context, ownerUserID string) ([]Collection, error)
+	GetByID(ctx context.Context, id string, ownerUserID string) (Collection, error)
 	Create(ctx context.Context, params CreateParams) (Collection, error)
 	Update(ctx context.Context, params UpdateParams) (Collection, error)
 	Delete(ctx context.Context, id string, ownerUserID string) error
@@ -90,6 +91,18 @@ func (s *Service) List(ctx context.Context, ownerUserID string) ([]Collection, e
 	}
 
 	return s.repo.ListByOwner(ctx, ownerUserID)
+}
+
+func (s *Service) Get(ctx context.Context, id string, ownerUserID string) (Collection, error) {
+	if s == nil || s.repo == nil {
+		return Collection{}, ErrUnavailable
+	}
+
+	if strings.TrimSpace(id) == "" || strings.TrimSpace(ownerUserID) == "" {
+		return Collection{}, ErrInvalid
+	}
+
+	return s.repo.GetByID(ctx, strings.TrimSpace(id), strings.TrimSpace(ownerUserID))
 }
 
 func (s *Service) Create(ctx context.Context, params CreateParams) (Collection, error) {

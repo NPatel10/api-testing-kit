@@ -44,6 +44,27 @@ type RunRecord struct {
 	Metadata            json.RawMessage `json:"metadata,omitempty"`
 }
 
+type ListQuery struct {
+	UserID string
+	Status string
+	Method string
+	Domain string
+	Date   *time.Time
+	Page   int32
+	Limit  int32
+}
+
+type ListPagination struct {
+	Page    int32 `json:"page"`
+	Limit   int32 `json:"limit"`
+	HasMore bool  `json:"hasMore"`
+}
+
+type ListResult struct {
+	Items      []RunRecord
+	Pagination ListPagination
+}
+
 type CreateParams struct {
 	UserID              string
 	CollectionID        *string
@@ -75,6 +96,7 @@ type CreateParams struct {
 
 type Repository interface {
 	ListByUser(ctx context.Context, userID string, limit int32) ([]RunRecord, error)
+	ListByUserWithFilters(ctx context.Context, query ListQuery) ([]RunRecord, error)
 	Create(ctx context.Context, params CreateParams) (RunRecord, error)
 }
 
@@ -98,6 +120,59 @@ func (s *Service) List(ctx context.Context, userID string, limit int32) ([]RunRe
 		limit = 20
 	}
 	return s.repo.ListByUser(ctx, userID, limit)
+}
+
+func (s *Service) ListWithFilters(ctx context.Context, query ListQuery) (ListResult, error) {
+	if s == nil || s.repo == nil {
+		return ListResult{}, ErrUnavailable
+	}
+
+	query.UserID = strings.TrimSpace(query.UserID)
+	if query.UserID == "" {
+		return ListResult{}, ErrInvalid
+	}
+
+	if query.Page <= 0 {
+		query.Page = 1
+	}
+	if query.Limit <= 0 {
+		query.Limit = 20
+	}
+	if query.Limit > 100 {
+		query.Limit = 100
+	}
+	query.Status = strings.TrimSpace(query.Status)
+	switch method := strings.TrimSpace(query.Method); {
+	case method == "":
+		query.Method = ""
+	case strings.EqualFold(method, "all"):
+		query.Method = ""
+	default:
+		query.Method = strings.ToUpper(method)
+	}
+	query.Domain = strings.ToLower(strings.TrimSpace(query.Domain))
+
+	fetchQuery := query
+	fetchQuery.Limit = query.Limit + 1
+
+	items, err := s.repo.ListByUserWithFilters(ctx, fetchQuery)
+	if err != nil {
+		return ListResult{}, err
+	}
+
+	hasMore := int32(len(items)) > query.Limit
+	if hasMore {
+		items = items[:query.Limit]
+	}
+
+	return ListResult{
+		Items: items,
+		Pagination: ListPagination{
+			Page:    query.Page,
+			Limit:   query.Limit,
+			HasMore: hasMore,
+		},
+	}, nil
 }
 
 func (s *Service) Create(ctx context.Context, params CreateParams) (RunRecord, error) {

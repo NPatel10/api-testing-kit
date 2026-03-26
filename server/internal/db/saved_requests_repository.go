@@ -31,13 +31,37 @@ func (r *SavedRequestRepository) GetByID(ctx context.Context, id string, ownerUs
 	return item, nil
 }
 
+func (r *SavedRequestRepository) ListByCollection(ctx context.Context, collectionID string, ownerUserID string) ([]requests.SavedRequest, error) {
+	rows, err := r.pool.Query(ctx, savedRequestSelect+`
+		WHERE collection_id = $1
+		  AND owner_user_id = $2
+		  AND deleted_at IS NULL
+		ORDER BY sort_order ASC, created_at ASC, id ASC
+	`, collectionID, ownerUserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	items := make([]requests.SavedRequest, 0)
+	for rows.Next() {
+		item, err := scanSavedRequest(rows.Scan)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+
+	return items, rows.Err()
+}
+
 func (r *SavedRequestRepository) Create(ctx context.Context, params requests.CreateParams) (requests.SavedRequest, error) {
 	row := r.pool.QueryRow(ctx, `
 		INSERT INTO saved_requests (
 			collection_id, owner_user_id, name, description, method, url, query_params, headers, auth_scheme, auth_config, body_mode, body_config, example_response, metadata
 		)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
-		RETURNING id, collection_id, owner_user_id, name, COALESCE(description, ''), method, url, query_params, headers, auth_scheme, auth_config, body_mode, body_config, example_response, metadata, created_at, updated_at, deleted_at
+		RETURNING id, collection_id, owner_user_id, name, COALESCE(description, ''), method, url, sort_order, query_params, headers, auth_scheme, auth_config, body_mode, body_config, example_response, metadata, created_at, updated_at, deleted_at
 	`,
 		params.CollectionID, params.OwnerUserID, params.Name, params.Description, params.Method, params.URL, params.QueryParams, params.Headers, params.AuthScheme, params.AuthConfig, params.BodyMode, params.BodyConfig, params.ExampleResponse, params.Metadata,
 	)
@@ -62,7 +86,7 @@ func (r *SavedRequestRepository) Update(ctx context.Context, params requests.Upd
 			example_response = COALESCE($14, example_response),
 			metadata = COALESCE($15, metadata)
 		WHERE id = $1 AND owner_user_id = $2 AND deleted_at IS NULL
-		RETURNING id, collection_id, owner_user_id, name, COALESCE(description, ''), method, url, query_params, headers, auth_scheme, auth_config, body_mode, body_config, example_response, metadata, created_at, updated_at, deleted_at
+		RETURNING id, collection_id, owner_user_id, name, COALESCE(description, ''), method, url, sort_order, query_params, headers, auth_scheme, auth_config, body_mode, body_config, example_response, metadata, created_at, updated_at, deleted_at
 	`,
 		params.ID, params.OwnerUserID, nullableUUID(params.CollectionID), params.Name, params.Description, params.Method, params.URL, params.QueryParams, params.Headers, params.AuthScheme, params.AuthConfig, params.BodyMode, params.BodyConfig, params.ExampleResponse, params.Metadata,
 	)
@@ -92,7 +116,7 @@ func (r *SavedRequestRepository) Delete(ctx context.Context, id string, ownerUse
 }
 
 const savedRequestSelect = `
-	SELECT id, collection_id, owner_user_id, name, COALESCE(description, ''), method, url, query_params, headers, auth_scheme, auth_config, body_mode, body_config, example_response, metadata, created_at, updated_at, deleted_at
+	SELECT id, collection_id, owner_user_id, name, COALESCE(description, ''), method, url, sort_order, query_params, headers, auth_scheme, auth_config, body_mode, body_config, example_response, metadata, created_at, updated_at, deleted_at
 	FROM saved_requests
 `
 
@@ -110,6 +134,7 @@ func scanSavedRequest(scan func(dest ...any) error) (requests.SavedRequest, erro
 		&item.Description,
 		&item.Method,
 		&item.URL,
+		&item.SortOrder,
 		&item.QueryParams,
 		&item.Headers,
 		&item.AuthScheme,
