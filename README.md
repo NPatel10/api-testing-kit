@@ -48,6 +48,17 @@ api-testing-kit/
 
 ## Root Commands
 
+### Monorepo
+
+```bash
+bun run dev
+bun run build
+bun run preview
+bun run lint
+bun run typecheck
+bun run test
+```
+
 ### Frontend
 
 ```bash
@@ -55,6 +66,8 @@ bun run dev:web
 bun run build:web
 bun run preview:web
 bun run check:web
+bun run lint:web
+bun run typecheck:web
 bun run test:web
 ```
 
@@ -62,13 +75,9 @@ bun run test:web
 
 ```bash
 bun run dev:server
+bun run lint:server
+bun run typecheck:server
 bun run test:server
-```
-
-### Combined
-
-```bash
-bun run test
 ```
 
 ## Environment
