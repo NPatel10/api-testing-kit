@@ -555,6 +555,7 @@ Depends on:
 
 ### G4. CI Checks
 Owner: `Agent Group G`
+Status: `completed` on `2026-03-26`
 
 Scope:
 - Add lint, typecheck, test, and build checks.
