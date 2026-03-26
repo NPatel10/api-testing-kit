@@ -12,8 +12,15 @@
 	import TerminalIcon from "@lucide/svelte/icons/terminal";
 	import CodeXmlIcon from "@lucide/svelte/icons/code-xml";
 	import HistoryIcon from "@lucide/svelte/icons/history";
+	import type { WorkspaceMode } from "$lib/mocks/workspace-state";
 
-	let { mobileLabel = "Utilities" }: { mobileLabel?: string } = $props();
+	let {
+		mobileLabel = "Utilities",
+		mode = "guest",
+	}: {
+		mobileLabel?: string;
+		mode?: WorkspaceMode;
+	} = $props();
 	let open = $state(false);
 
 	const snippets = [
@@ -58,18 +65,26 @@
 
 				<TabsContent value="history" class="space-y-3">
 					<div class="rounded-2xl border border-border/70 bg-panel-soft p-4">
-						<p class="text-sm font-medium text-foreground">No saved history yet</p>
+						<p class="text-sm font-medium text-foreground">
+							{mode === "authenticated" ? "Authenticated history ready" : "No saved history yet"}
+						</p>
 						<p class="mt-1 text-xs leading-5 text-muted-foreground">
-							Authenticated requests will populate here once persistence is wired.
+							{mode === "authenticated"
+								? "Saved requests and replayable runs will populate here once persistence is wired."
+								: "Authenticated requests will populate here once persistence is wired."}
 						</p>
 					</div>
 				</TabsContent>
 
 				<TabsContent value="advanced" class="space-y-3">
 					<div class="rounded-2xl border border-dashed border-border/80 bg-gradient-to-br from-emerald-50 to-white p-4">
-						<p class="text-sm font-medium text-foreground">Locked for guests</p>
+						<p class="text-sm font-medium text-foreground">
+							{mode === "authenticated" ? "Advanced tools available" : "Locked for guests"}
+						</p>
 						<p class="mt-1 text-xs leading-5 text-muted-foreground">
-							Environment variables, custom targets, and advanced tooling will unlock after sign-in.
+							{mode === "authenticated"
+								? "Environment variables, custom targets, and advanced tooling are part of the authenticated contract."
+								: "Environment variables, custom targets, and advanced tooling will unlock after sign-in."}
 						</p>
 					</div>
 				</TabsContent>
@@ -109,18 +124,26 @@
 
 					<TabsContent value="history" class="space-y-3">
 						<div class="rounded-2xl border border-border/70 bg-panel-soft p-4">
-							<p class="text-sm font-medium text-foreground">No saved history yet</p>
+							<p class="text-sm font-medium text-foreground">
+								{mode === "authenticated" ? "Authenticated history ready" : "No saved history yet"}
+							</p>
 							<p class="mt-1 text-xs leading-5 text-muted-foreground">
-								Authenticated requests will populate here once persistence is wired.
+								{mode === "authenticated"
+									? "Saved requests and replayable runs will populate here once persistence is wired."
+									: "Authenticated requests will populate here once persistence is wired."}
 							</p>
 						</div>
 					</TabsContent>
 
 					<TabsContent value="advanced" class="space-y-3">
 						<div class="rounded-2xl border border-dashed border-border/80 bg-gradient-to-br from-emerald-50 to-white p-4">
-							<p class="text-sm font-medium text-foreground">Locked for guests</p>
+							<p class="text-sm font-medium text-foreground">
+								{mode === "authenticated" ? "Advanced tools available" : "Locked for guests"}
+							</p>
 							<p class="mt-1 text-xs leading-5 text-muted-foreground">
-								Environment variables, custom targets, and advanced tooling will unlock after sign-in.
+								{mode === "authenticated"
+									? "Environment variables, custom targets, and advanced tooling are part of the authenticated contract."
+									: "Environment variables, custom targets, and advanced tooling will unlock after sign-in."}
 							</p>
 						</div>
 					</TabsContent>

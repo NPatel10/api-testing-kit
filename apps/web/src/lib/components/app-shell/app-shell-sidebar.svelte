@@ -21,6 +21,15 @@
 	import ShieldCheckIcon from "@lucide/svelte/icons/shield-check";
 	import TerminalSquareIcon from "@lucide/svelte/icons/terminal-square";
 	import SparklesIcon from "@lucide/svelte/icons/sparkles";
+	import type { WorkspaceMode } from "$lib/mocks/workspace-state";
+
+	let {
+		mode = "guest",
+		sessionLabel = "Guest preview",
+	}: {
+		mode?: WorkspaceMode;
+		sessionLabel?: string;
+	} = $props();
 
 	const primaryNav = [
 		{ label: "Workspace", href: "/app", icon: LayoutDashboardIcon, active: true, badge: "Live" },
@@ -51,12 +60,16 @@
 		<div class="flex items-center justify-between gap-3">
 			<div>
 				<p class="text-xs uppercase tracking-[0.24em] text-muted-foreground">Session</p>
-				<p class="text-sm font-medium text-foreground">Guest preview</p>
+				<p class="text-sm font-medium text-foreground">{sessionLabel}</p>
 			</div>
-			<Badge variant="secondary">Locked</Badge>
+			<Badge variant={mode === "authenticated" ? "default" : "secondary"}>
+				{mode === "authenticated" ? "Active" : "Locked"}
+			</Badge>
 		</div>
 		<p class="mt-2 text-xs leading-5 text-muted-foreground">
-			Guests can explore the live shell. Custom URLs and saved data stay behind sign-in.
+			{mode === "authenticated"
+				? "Custom URLs, saved requests, and history are available in the same shell."
+				: "Guests can explore the live shell. Custom URLs and saved data stay behind sign-in."}
 		</p>
 	</div>
 </SidebarHeader>
@@ -113,12 +126,20 @@
 
 	<div class="px-2">
 		<div class="rounded-2xl border border-border/70 bg-gradient-to-br from-emerald-50 to-white p-4 shadow-sm">
-			<p class="text-xs uppercase tracking-[0.24em] text-muted-foreground">Guest limits</p>
-			<p class="mt-2 text-sm font-medium text-foreground">Allowlisted endpoints only</p>
-			<p class="mt-1 text-xs leading-5 text-muted-foreground">
-				The shell is real, but request execution stays constrained until authentication lands.
+			<p class="text-xs uppercase tracking-[0.24em] text-muted-foreground">
+				{mode === "authenticated" ? "Workspace limits" : "Guest limits"}
 			</p>
-			<Button variant="outline" size="sm" class="mt-3 w-full">Sign in to unlock</Button>
+			<p class="mt-2 text-sm font-medium text-foreground">
+				{mode === "authenticated" ? "Authenticated execution enabled" : "Allowlisted endpoints only"}
+			</p>
+			<p class="mt-1 text-xs leading-5 text-muted-foreground">
+				{mode === "authenticated"
+					? "The shell now follows the authenticated contract, while still keeping the same visual structure."
+					: "The shell is real, but request execution stays constrained until authentication lands."}
+			</p>
+			<Button variant="outline" size="sm" class="mt-3 w-full">
+				{mode === "authenticated" ? "Account ready" : "Sign in to unlock"}
+			</Button>
 		</div>
 	</div>
 </SidebarContent>
@@ -126,7 +147,7 @@
 <SidebarFooter class="gap-3 px-4 pb-4">
 	<Separator />
 	<div class="flex items-center justify-between text-xs text-muted-foreground">
-		<span>v0 shell</span>
-		<span>Safe by default</span>
+		<span>{mode === "authenticated" ? "Authenticated shell" : "v0 shell"}</span>
+		<span>{mode === "authenticated" ? "Quota-aware" : "Safe by default"}</span>
 	</div>
 </SidebarFooter>
