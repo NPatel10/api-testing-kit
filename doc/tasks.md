@@ -13,6 +13,15 @@ The goal is to let multiple subagents work at the same time with minimal overlap
 
 All tasks below are aligned with `plan.md`, `ui-pages.md`, and `design-guideline.md`.
 
+## Status Audit
+
+Audited on `2026-03-26` against the checked-out branch `codex/bl3-route-contract`.
+
+- This branch is `12` commits behind `main` and `3` commits ahead.
+- Removing worktrees did not delete committed task work; branches and commits still exist in Git history.
+- Statuses marked `completed on main` mean the implementation exists on `main`, but is not present in the current branch checkout.
+- The only known unrecoverable loss from worktree removal was uncommitted local UI work in the former `wt-g1` worktree.
+
 ---
 
 ## Work Rules
@@ -41,6 +50,7 @@ These items should be completed before most parallel feature work starts.
 
 ### BL1. Project Scaffold
 Owner: `Agent Group A`
+Status: `completed in current branch` on `2026-03-26`
 
 Scope:
 - Create the base SvelteKit app structure.
@@ -58,6 +68,7 @@ Unblocks:
 
 ### BL2. Database Schema
 Owner: `Agent Group C`
+Status: `completed in current branch` on `2026-03-26`
 
 Scope:
 - Create `schema.sql`.
@@ -76,6 +87,7 @@ Unblocks:
 
 ### BL3. Route and App Contract
 Owner: `Agent Group A`
+Status: `completed in current branch` on `2026-03-26`
 
 Scope:
 - Confirm the `/app` shared guest/authenticated model.
@@ -350,6 +362,7 @@ Depends on:
 
 ### D3. Guest Restrictions
 Owner: `Agent Group D`
+Status: `completed on main` on `2026-03-26`; missing from the current branch checkout
 
 Scope:
 - Enforce allowlisted endpoints for guests on `/app`.
@@ -398,6 +411,7 @@ If monetization is not part of the current milestone, skip this track entirely.
 
 ### E1. Plan And Entitlement Model
 Owner: `Agent Group E`
+Status: `completed on main` on `2026-03-26`; missing from the current branch checkout
 
 Scope:
 - Define plan tiers and feature entitlements.
@@ -409,6 +423,7 @@ Depends on:
 
 ### E2. Billing Customer And Subscription Storage
 Owner: `Agent Group E`
+Status: `completed in current branch` on `2026-03-26`
 
 Scope:
 - Store billing customer IDs, subscription status, renewal state, and plan mapping.
@@ -420,6 +435,7 @@ Depends on:
 
 ### E3. Access Control By Plan
 Owner: `Agent Group E`
+Status: `completed on main` on `2026-03-26`; missing from the current branch checkout
 
 Scope:
 - Gate custom URL execution, saved history depth, env vars, and shared links by entitlement.
@@ -432,6 +448,7 @@ Depends on:
 
 ### E4. Billing Provider Integration Stub
 Owner: `Agent Group E`
+Status: `completed on main` on `2026-03-26`; missing from the current branch checkout
 
 Scope:
 - Add webhook endpoint skeleton.
@@ -547,6 +564,7 @@ Depends on:
 
 ### G4. CI Checks
 Owner: `Agent Group G`
+Status: `completed on main` on `2026-03-26`; missing from the current branch checkout
 
 Scope:
 - Add lint, typecheck, test, and build checks.
