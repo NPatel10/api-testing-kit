@@ -21,14 +21,17 @@
 	import ShieldCheckIcon from "@lucide/svelte/icons/shield-check";
 	import TerminalSquareIcon from "@lucide/svelte/icons/terminal-square";
 	import SparklesIcon from "@lucide/svelte/icons/sparkles";
+	import { getEntitlementSummary, type EffectiveEntitlements } from "$lib/entitlements/access";
 	import type { WorkspaceMode } from "$lib/mocks/workspace-state";
 
 	let {
 		mode = "guest",
 		sessionLabel = "Guest preview",
+		entitlements,
 	}: {
 		mode?: WorkspaceMode;
 		sessionLabel?: string;
+		entitlements?: EffectiveEntitlements;
 	} = $props();
 
 	const primaryNav = [
@@ -62,14 +65,16 @@
 				<p class="text-xs uppercase tracking-[0.24em] text-muted-foreground">Session</p>
 				<p class="text-sm font-medium text-foreground">{sessionLabel}</p>
 			</div>
-			<Badge variant={mode === "authenticated" ? "default" : "secondary"}>
-				{mode === "authenticated" ? "Active" : "Locked"}
-			</Badge>
+			<Badge variant={mode === "authenticated" ? "default" : "secondary"}>{mode}</Badge>
 		</div>
 		<p class="mt-2 text-xs leading-5 text-muted-foreground">
-			{mode === "authenticated"
-				? "Custom URLs, saved requests, and history are available in the same shell."
-				: "Guests can explore the live shell. Custom URLs and saved data stay behind sign-in."}
+			{#if entitlements}
+				{getEntitlementSummary(entitlements, mode)}
+			{:else if mode === "authenticated"}
+				Custom URLs, saved requests, and history are available in the same shell.
+			{:else}
+				Guests can explore the live shell. Custom URLs and saved data stay behind sign-in.
+			{/if}
 		</p>
 	</div>
 </SidebarHeader>

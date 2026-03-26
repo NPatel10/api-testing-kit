@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"api-testing-kit/server/internal/auth"
+	"api-testing-kit/server/internal/entitlements"
 )
 
 const sessionCookieName = "api_testing_kit_session"
@@ -17,8 +18,9 @@ type AuthHandler struct {
 }
 
 type authEnvelope struct {
-	User    userResponse    `json:"user"`
-	Session sessionResponse `json:"session"`
+	User         userResponse        `json:"user"`
+	Session      sessionResponse     `json:"session"`
+	Entitlements entitlementResponse `json:"entitlements"`
 }
 
 type userResponse struct {
@@ -39,6 +41,28 @@ type sessionResponse struct {
 	ID        string    `json:"id"`
 	ExpiresAt time.Time `json:"expiresAt"`
 	CreatedAt time.Time `json:"createdAt"`
+}
+
+type entitlementResponse struct {
+	Plan         planResponse         `json:"plan"`
+	Capabilities []capabilityResponse `json:"capabilities"`
+}
+
+type planResponse struct {
+	Code   string `json:"code"`
+	Name   string `json:"name"`
+	Source string `json:"source"`
+}
+
+type capabilityResponse struct {
+	Key         string `json:"key"`
+	Label       string `json:"label"`
+	Description string `json:"description"`
+	Enabled     bool   `json:"enabled"`
+	Scope       string `json:"scope"`
+	Limit       *int   `json:"limit,omitempty"`
+	LimitLabel  string `json:"limitLabel,omitempty"`
+	Reason      string `json:"reason,omitempty"`
 }
 
 type authRequest struct {
@@ -82,8 +106,9 @@ func (h *AuthHandler) handleSignup(w http.ResponseWriter, r *http.Request) {
 
 	setSessionCookie(w, r, result.Token, result.Session.ExpiresAt)
 	writeJSON(w, http.StatusCreated, authEnvelope{
-		User:    toUserResponse(result.User),
-		Session: toSessionResponse(result.Session),
+		User:         toUserResponse(result.User),
+		Session:      toSessionResponse(result.Session),
+		Entitlements: toEntitlementResponse(entitlements.Resolve(result.User)),
 	})
 }
 
@@ -110,8 +135,9 @@ func (h *AuthHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
 
 	setSessionCookie(w, r, result.Token, result.Session.ExpiresAt)
 	writeJSON(w, http.StatusOK, authEnvelope{
-		User:    toUserResponse(result.User),
-		Session: toSessionResponse(result.Session),
+		User:         toUserResponse(result.User),
+		Session:      toSessionResponse(result.Session),
+		Entitlements: toEntitlementResponse(entitlements.Resolve(result.User)),
 	})
 }
 
@@ -153,8 +179,9 @@ func (h *AuthHandler) handleMe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusOK, map[string]any{
-		"user":    toUserResponse(user),
-		"session": toSessionResponse(session),
+		"user":         toUserResponse(user),
+		"session":      toSessionResponse(session),
+		"entitlements": toEntitlementResponse(entitlements.Resolve(user)),
 	})
 }
 
@@ -196,6 +223,31 @@ func toSessionResponse(session auth.SessionRecord) sessionResponse {
 		ID:        session.ID,
 		ExpiresAt: session.ExpiresAt,
 		CreatedAt: session.CreatedAt,
+	}
+}
+
+func toEntitlementResponse(state entitlements.State) entitlementResponse {
+	capabilities := make([]capabilityResponse, 0, len(state.Capabilities))
+	for _, capability := range state.Capabilities {
+		capabilities = append(capabilities, capabilityResponse{
+			Key:         string(capability.Key),
+			Label:       capability.Label,
+			Description: capability.Description,
+			Enabled:     capability.Enabled,
+			Scope:       capability.Scope,
+			Limit:       capability.Limit,
+			LimitLabel:  capability.LimitLabel,
+			Reason:      capability.Reason,
+		})
+	}
+
+	return entitlementResponse{
+		Plan: planResponse{
+			Code:   state.Plan.Code,
+			Name:   state.Plan.Name,
+			Source: string(state.Plan.Source),
+		},
+		Capabilities: capabilities,
 	}
 }
 

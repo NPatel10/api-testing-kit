@@ -6,6 +6,6 @@
 	let { children, data }: { children: Snippet; data: LayoutData } = $props();
 </script>
 
-<AppShellShell mode={data.mode} sessionLabel={data.sessionLabel}>
+<AppShellShell mode={data.mode} sessionLabel={data.sessionLabel} entitlements={data.entitlements}>
 	{@render children()}
 </AppShellShell>

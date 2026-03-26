@@ -6,14 +6,17 @@
 	import SlidersHorizontalIcon from "@lucide/svelte/icons/sliders-horizontal";
 	import CirclePlusIcon from "@lucide/svelte/icons/circle-plus";
 	import BellIcon from "@lucide/svelte/icons/bell";
+	import { getEntitlementSummary, type EffectiveEntitlements } from "$lib/entitlements/access";
 	import type { WorkspaceMode } from "$lib/mocks/workspace-state";
 
 	let {
 		mode = "guest",
 		sessionLabel = "Guest preview",
+		entitlements,
 	}: {
 		mode?: WorkspaceMode;
 		sessionLabel?: string;
+		entitlements?: EffectiveEntitlements;
 	} = $props();
 </script>
 
@@ -30,7 +33,11 @@
 		<Badge variant={mode === "authenticated" ? "default" : "secondary"} class="hidden sm:inline-flex">
 			{sessionLabel}
 		</Badge>
-		<Badge variant="outline" class="hidden md:inline-flex">{mode}</Badge>
+		{#if entitlements}
+			<Badge variant="outline" class="hidden md:inline-flex">{entitlements.plan.name}</Badge>
+		{:else}
+			<Badge variant="outline" class="hidden md:inline-flex">{mode}</Badge>
+		{/if}
 		<Button variant="outline" size="icon-sm" aria-label="Filters">
 			<SlidersHorizontalIcon class="size-4" />
 		</Button>
@@ -43,3 +50,7 @@
 		</Button>
 	</div>
 </div>
+
+{#if entitlements}
+	<p class="px-1 pt-2 text-xs leading-5 text-muted-foreground">{getEntitlementSummary(entitlements, mode)}</p>
+{/if}

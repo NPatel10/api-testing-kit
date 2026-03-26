@@ -12,14 +12,17 @@
 	import TerminalIcon from "@lucide/svelte/icons/terminal";
 	import CodeXmlIcon from "@lucide/svelte/icons/code-xml";
 	import HistoryIcon from "@lucide/svelte/icons/history";
+	import { buildEntitlementRows, type EffectiveEntitlements } from "$lib/entitlements/access";
 	import type { WorkspaceMode } from "$lib/mocks/workspace-state";
 
 	let {
 		mobileLabel = "Utilities",
 		mode = "guest",
+		entitlements,
 	}: {
 		mobileLabel?: string;
 		mode?: WorkspaceMode;
+		entitlements?: EffectiveEntitlements;
 	} = $props();
 	let open = $state(false);
 
@@ -87,6 +90,22 @@
 								: "Environment variables, custom targets, and advanced tooling will unlock after sign-in."}
 						</p>
 					</div>
+					{#if entitlements}
+						<div class="grid gap-2">
+							{#each buildEntitlementRows(entitlements) as row}
+								<div class="rounded-2xl border border-border/70 bg-panel-soft p-3">
+									<div class="flex items-center justify-between gap-3">
+										<p class="text-sm font-medium text-foreground">{row.label}</p>
+										<Badge variant={row.tone === "positive" ? "default" : "secondary"}>{row.statusLabel}</Badge>
+									</div>
+									<p class="mt-1 text-xs leading-5 text-muted-foreground">{row.description}</p>
+									{#if row.limitLabel}
+										<p class="mt-2 text-xs font-medium text-foreground">{row.limitLabel}</p>
+									{/if}
+								</div>
+							{/each}
+						</div>
+					{/if}
 				</TabsContent>
 			</Tabs>
 		</div>
@@ -146,6 +165,22 @@
 									: "Environment variables, custom targets, and advanced tooling will unlock after sign-in."}
 							</p>
 						</div>
+						{#if entitlements}
+							<div class="grid gap-2">
+								{#each buildEntitlementRows(entitlements) as row}
+									<div class="rounded-2xl border border-border/70 bg-panel-soft p-3">
+										<div class="flex items-center justify-between gap-3">
+											<p class="text-sm font-medium text-foreground">{row.label}</p>
+											<Badge variant={row.tone === "positive" ? "default" : "secondary"}>{row.statusLabel}</Badge>
+										</div>
+										<p class="mt-1 text-xs leading-5 text-muted-foreground">{row.description}</p>
+										{#if row.limitLabel}
+											<p class="mt-2 text-xs font-medium text-foreground">{row.limitLabel}</p>
+										{/if}
+									</div>
+								{/each}
+							</div>
+						{/if}
 					</TabsContent>
 				</Tabs>
 			</div>

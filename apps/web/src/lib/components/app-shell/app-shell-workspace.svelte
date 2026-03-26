@@ -15,14 +15,16 @@
 	import ResponseViewer from "$lib/components/workspace/response-viewer.svelte";
 	import type { ResponseHeader } from "$lib/components/workspace/response-viewer";
 	import TemplateBrowser from "$lib/components/workspace/template-browser.svelte";
+	import { buildEntitlementRows, getEntitlementSummary, type EffectiveEntitlements } from "$lib/entitlements/access";
 	import { authenticatedWorkspaceState, guestWorkspaceState } from "$lib/mocks/workspace-state";
 	import type { WorkspaceMode } from "$lib/mocks/workspace-state";
 
 	type Props = {
 		mode?: WorkspaceMode;
+		entitlements?: EffectiveEntitlements;
 	};
 
-	let { mode = "guest" }: Props = $props();
+	let { mode = "guest", entitlements }: Props = $props();
 	const workspaceState = $derived(mode === "authenticated" ? authenticatedWorkspaceState : guestWorkspaceState);
 	const primaryTemplate = $derived(workspaceState.templates[0]);
 
@@ -156,6 +158,32 @@
 </script>
 
 <section class="space-y-4">
+	{#if entitlements}
+		<Card class="panel-card">
+			<CardHeader class="gap-3">
+				<div class="flex items-center justify-between gap-3">
+					<div>
+						<CardTitle>{entitlements.plan.name}</CardTitle>
+						<CardDescription>{getEntitlementSummary(entitlements, mode)}</CardDescription>
+					</div>
+					<Badge variant="outline">{entitlements.plan.source}</Badge>
+				</div>
+			</CardHeader>
+			<CardContent class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+				{#each buildEntitlementRows(entitlements) as row}
+					<div class={`rounded-[20px] border px-4 py-4 ${row.tone === "positive" ? "border-success/20 bg-success/10 text-success" : "border-warning/20 bg-warning/10 text-warning"}`}>
+						<p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-text-muted">{row.label}</p>
+						<p class="mt-2 text-base font-semibold tracking-tight text-current">{row.statusLabel}</p>
+						<p class="mt-1 text-sm text-text-body">{row.description}</p>
+						{#if row.limitLabel}
+							<p class="mt-2 text-xs font-medium text-text-muted">{row.limitLabel}</p>
+						{/if}
+					</div>
+				{/each}
+			</CardContent>
+		</Card>
+	{/if}
+
 	<div class="grid gap-4 xl:grid-cols-[1.18fr_0.95fr]">
 		<RequestBuilder
 			title="Request builder"
