@@ -11,6 +11,7 @@ import (
 	"api-testing-kit/server/internal/db"
 	"api-testing-kit/server/internal/guest"
 	"api-testing-kit/server/internal/history"
+	"api-testing-kit/server/internal/ratelimit"
 	"api-testing-kit/server/internal/requests"
 	"api-testing-kit/server/internal/runner"
 	"api-testing-kit/server/internal/safety"
@@ -167,6 +168,8 @@ func registerSavedRequestRoutes(mux *http.ServeMux, deps RouterDeps) {
 
 func registerRunRoutes(mux *http.ServeMux, deps RouterDeps) {
 	var historyService *history.Service
+	var usageRecorder runner.UsageRecorder
+	var abuseRecorder runner.AbuseRecorder
 	authService := deps.Auth
 	if authService == nil && deps.Store != nil && deps.Store.Auth != nil {
 		authService = auth.NewService(deps.Store.Auth)
@@ -174,7 +177,18 @@ func registerRunRoutes(mux *http.ServeMux, deps RouterDeps) {
 	if deps.Store != nil && deps.Store.History != nil {
 		historyService = history.NewService(deps.Store.History)
 	}
-	runnerService := runner.NewService(nil, historyService, safety.DefaultOptions())
+	if deps.Store != nil {
+		usageRecorder = deps.Store.Usage
+		abuseRecorder = deps.Store.Abuse
+	}
+	runnerService := runner.NewService(
+		nil,
+		historyService,
+		safety.DefaultOptions(),
+		runner.WithLimiter(ratelimit.NewLimiter(ratelimit.AuthenticatedConfig())),
+		runner.WithUsageRecorder(usageRecorder),
+		runner.WithAbuseRecorder(abuseRecorder),
+	)
 	NewRunsHandler(runnerService, authService).Register(mux)
 }
 
