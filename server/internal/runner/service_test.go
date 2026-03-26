@@ -73,6 +73,10 @@ func (r *fakeHistoryRepo) ListByUser(ctx context.Context, userID string, limit i
 	return r.items, nil
 }
 
+func (r *fakeHistoryRepo) ListByUserWithFilters(ctx context.Context, query history.ListQuery) ([]history.RunRecord, error) {
+	return r.items, nil
+}
+
 func (r *fakeHistoryRepo) Create(ctx context.Context, params history.CreateParams) (history.RunRecord, error) {
 	record := history.RunRecord{
 		ID:            "run-1",
