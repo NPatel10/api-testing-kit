@@ -214,3 +214,74 @@ func normalizeInvoiceParams(params InvoiceUpsertParams, now time.Time) (InvoiceU
 
 	return params, nil
 }
+
+const ProviderStatusUnfinalized = "provider_choice_not_finalized"
+
+type StubService struct {
+	ProviderStatus string
+	SentAt         func() time.Time
+}
+
+type CheckoutHook struct {
+	Status       string `json:"status"`
+	Message      string `json:"message"`
+	NextAction   string `json:"nextAction"`
+	ProviderNote string `json:"providerNote"`
+}
+
+type WebhookReceipt struct {
+	Status       string    `json:"status"`
+	Message      string    `json:"message"`
+	ProviderNote string    `json:"providerNote"`
+	ReceivedAt   time.Time `json:"receivedAt"`
+}
+
+func NewStubService() *StubService {
+	return &StubService{
+		ProviderStatus: ProviderStatusUnfinalized,
+		SentAt:         time.Now,
+	}
+}
+
+func (s *StubService) CheckoutSuccess() CheckoutHook {
+	return CheckoutHook{
+		Status:       "checkout_success_stub",
+		Message:      "Checkout success handling is stubbed until a billing provider is chosen.",
+		NextAction:   "return_to_app",
+		ProviderNote: s.providerNote(),
+	}
+}
+
+func (s *StubService) CheckoutCancel() CheckoutHook {
+	return CheckoutHook{
+		Status:       "checkout_cancel_stub",
+		Message:      "Checkout cancel handling is stubbed until a billing provider is chosen.",
+		NextAction:   "return_to_pricing",
+		ProviderNote: s.providerNote(),
+	}
+}
+
+func (s *StubService) WebhookReceived() WebhookReceipt {
+	return WebhookReceipt{
+		Status:       "webhook_received_stub",
+		Message:      "Billing webhooks are accepted as a stub while the provider remains undecided.",
+		ProviderNote: s.providerNote(),
+		ReceivedAt:   s.now(),
+	}
+}
+
+func (s *StubService) providerNote() string {
+	if s == nil || s.ProviderStatus == "" {
+		return ProviderStatusUnfinalized
+	}
+
+	return s.ProviderStatus
+}
+
+func (s *StubService) now() time.Time {
+	if s != nil && s.SentAt != nil {
+		return s.SentAt().UTC()
+	}
+
+	return time.Now().UTC()
+}
