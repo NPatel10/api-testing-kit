@@ -275,7 +275,7 @@ Depends on:
 
 ### C3. Collections API
 Owner: `Agent Group C`
-Status: `completed` on `2026-03-25`
+Status: `completed` on `2026-03-25`; collection detail surface follow-up completed on `2026-03-26`
 
 Scope:
 - CRUD for collections.
@@ -288,7 +288,7 @@ Depends on:
 
 ### C4. Saved Requests And History API
 Owner: `Agent Group C`
-Status: `completed` on `2026-03-25`
+Status: `completed` on `2026-03-25`; authenticated history surface follow-up completed on `2026-03-26`
 
 Scope:
 - CRUD for saved requests.
@@ -312,7 +312,7 @@ Depends on:
 
 ### C6. Usage And Abuse Storage
 Owner: `Agent Group C`
-Status: `completed` on `2026-03-25`
+Status: `completed` on `2026-03-25`; admin monitoring query surface follow-up completed on `2026-03-26`
 
 Scope:
 - Persist usage events, blocked attempts, abuse events, and denylist entries.
@@ -379,7 +379,7 @@ Depends on:
 
 ### D5. Abuse Detection Hooks
 Owner: `Agent Group D`
-Status: `completed` on `2026-03-25`
+Status: `completed` on `2026-03-25`; admin abuse monitor surface follow-up completed on `2026-03-26`
 
 Scope:
 - Log suspicious request patterns.
