@@ -36,6 +36,7 @@ func NewRouter(deps RouterDeps) http.Handler {
 	registerGuestRoutes(mux, deps)
 	registerAuthRoutes(mux, deps)
 	registerBillingRoutes(mux)
+	registerAdminRoutes(mux, deps)
 	registerCollectionRoutes(mux, deps)
 	registerSavedRequestRoutes(mux, deps)
 	registerRunRoutes(mux, deps)
@@ -113,6 +114,22 @@ func registerGuestRoutes(mux *http.ServeMux, deps RouterDeps) {
 
 func registerBillingRoutes(mux *http.ServeMux) {
 	NewBillingHandler(billing.NewStubService()).Register(mux)
+}
+
+func registerAdminRoutes(mux *http.ServeMux, deps RouterDeps) {
+	authService := deps.Auth
+	if authService == nil && deps.Store != nil && deps.Store.Auth != nil {
+		authService = auth.NewService(deps.Store.Auth)
+	}
+
+	var abuseRepo adminAbuseRepository
+	var blockedTargetsRepo adminBlockedTargetRepository
+	if deps.Store != nil {
+		abuseRepo = deps.Store.Abuse
+		blockedTargetsRepo = deps.Store.BlockedTargets
+	}
+
+	NewAdminHandler(abuseRepo, blockedTargetsRepo, authService).Register(mux)
 }
 
 func registerCollectionRoutes(mux *http.ServeMux, deps RouterDeps) {
