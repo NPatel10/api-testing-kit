@@ -2,6 +2,7 @@ package httpapi
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"api-testing-kit/server/internal/auth"
@@ -27,6 +28,8 @@ func (h *RunsHandler) handleRun(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusServiceUnavailable, "runner_unavailable", "request execution is temporarily unavailable")
 		return
 	}
+	r.Body = http.MaxBytesReader(w, r.Body, 1024*1024)
+
 	cookie, err := r.Cookie(sessionCookieName)
 	if err != nil || cookie.Value == "" {
 		writeError(w, http.StatusUnauthorized, "unauthorized", "missing session")
@@ -40,12 +43,33 @@ func (h *RunsHandler) handleRun(w http.ResponseWriter, r *http.Request) {
 
 	var payload runner.RunInput
 	if err := decodeJSON(r, &payload); err != nil {
+		var maxBytesErr *http.MaxBytesError
+		if errors.As(err, &maxBytesErr) {
+			writeError(w, http.StatusRequestEntityTooLarge, "request_too_large", "request payload is too large")
+			return
+		}
 		writeError(w, http.StatusBadRequest, "invalid_request", "request body must be valid JSON")
 		return
 	}
 
-	result, err := h.runner.Execute(r.Context(), user.ID, payload)
+	result, err := h.runner.Execute(r.Context(), user.ID, clientIPFromRequest(r), payload)
 	if err != nil {
+		var limitErr *runner.LimitError
+		if errors.As(err, &limitErr) {
+			if limitErr.RetryAfter > 0 {
+				w.Header().Set("Retry-After", fmt.Sprintf("%d", int(limitErr.RetryAfter.Seconds())))
+			}
+			writeError(w, http.StatusTooManyRequests, "rate_limited", limitErr.Message)
+			return
+		}
+		if errors.Is(err, runner.ErrTimedOut) {
+			writeError(w, http.StatusGatewayTimeout, "request_timeout", "request execution timed out")
+			return
+		}
+		if errors.Is(err, runner.ErrRequestTooLarge) {
+			writeError(w, http.StatusRequestEntityTooLarge, "request_too_large", "request body exceeds the authenticated limit")
+			return
+		}
 		var validationErr *safety.ValidationError
 		if errors.As(err, &validationErr) {
 			writeError(w, http.StatusForbidden, "blocked_target", validationErr.Message)
