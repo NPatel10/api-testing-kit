@@ -9,6 +9,7 @@
 		CardHeader,
 		CardTitle,
 	} from "$lib/components/ui/card/index.js";
+	import ArrowRightIcon from "@lucide/svelte/icons/arrow-right";
 	import Separator from "$lib/components/ui/separator/separator.svelte";
 	import HistoryIcon from "@lucide/svelte/icons/history";
 	import LockIcon from "@lucide/svelte/icons/lock";
@@ -93,6 +94,15 @@
 
 	<div class="grid gap-6 px-5 py-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8 lg:py-8">
 		<main class="space-y-6">
+			{#if data.notice}
+				<Card class="border border-amber-200 bg-amber-50/80 shadow-[0_12px_30px_rgba(21,31,23,0.05)]">
+					<CardHeader class="gap-2">
+						<CardTitle class="text-lg">Live history unavailable</CardTitle>
+						<CardDescription>{data.notice}</CardDescription>
+					</CardHeader>
+				</Card>
+			{/if}
+
 			<Card class="border border-[#e7e3d8] bg-white/90 shadow-[0_12px_30px_rgba(21,31,23,0.05)]">
 				<CardHeader class="gap-3">
 					<div class="flex flex-wrap items-center gap-2">
@@ -203,7 +213,7 @@
 													<div class="space-y-3">
 														<div class="flex flex-wrap items-center gap-2">
 															<Badge variant={entry.outcome === "success" ? "default" : entry.outcome === "blocked" ? "secondary" : "outline"}>
-																{entry.statusCode} {entry.statusText}
+																{entry.statusLabel}
 															</Badge>
 															<Badge variant="outline">{entry.method}</Badge>
 															<Badge variant="outline">{entry.domainLabel}</Badge>
@@ -212,12 +222,20 @@
 															<p class="text-base font-semibold text-text-strong">{entry.title}</p>
 															<p class="mt-1 text-sm leading-6 text-text-body">{entry.target}</p>
 														</div>
+														{#if entry.launchHref}
+															<div>
+																<Button href={entry.launchHref} size="sm" variant="outline" class="rounded-full">
+																	{entry.launchLabel ?? "Open in /app"}
+																	<ArrowRightIcon class="size-4" />
+																</Button>
+															</div>
+														{/if}
 													</div>
 
 													<div class="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:min-w-[360px]">
 														<div class="rounded-[18px] border border-border/70 bg-white px-3 py-2">
 															<p class="text-[11px] uppercase tracking-[0.18em] text-text-muted">Time</p>
-															<p class="mt-1 text-sm font-semibold">{entry.durationMs} ms</p>
+															<p class="mt-1 text-sm font-semibold">{entry.durationLabel}</p>
 														</div>
 														<div class="rounded-[18px] border border-border/70 bg-white px-3 py-2">
 															<p class="text-[11px] uppercase tracking-[0.18em] text-text-muted">Size</p>
@@ -225,7 +243,7 @@
 														</div>
 														<div class="rounded-[18px] border border-border/70 bg-white px-3 py-2">
 															<p class="text-[11px] uppercase tracking-[0.18em] text-text-muted">Type</p>
-															<p class="mt-1 text-sm font-semibold">{entry.contentType}</p>
+															<p class="mt-1 text-sm font-semibold">{entry.contentTypeLabel}</p>
 														</div>
 														<div class="rounded-[18px] border border-border/70 bg-white px-3 py-2">
 															<p class="text-[11px] uppercase tracking-[0.18em] text-text-muted">When</p>
@@ -243,7 +261,9 @@
 						<div class="rounded-[24px] border border-dashed border-[#d9e7d8] bg-[#fbfaf6] px-5 py-8 text-center">
 							<p class="text-base font-semibold text-text-strong">No history matches this view</p>
 							<p class="mt-2 text-sm leading-6 text-text-body">
-								Reset the filters to see the default preview set, or return to `/app` to run a new request.
+								{data.mode === "authenticated"
+									? "Reset the filters or run a request in `/app` to repopulate the persisted timeline."
+									: "Reset the filters to see the default preview set, or return to `/app` to run a new request."}
 							</p>
 						</div>
 					{/if}
@@ -283,7 +303,7 @@
 				</CardHeader>
 				<CardContent class="space-y-3 text-sm leading-6 text-text-body">
 					<p>The page is intentionally shaped around the same metadata that the backend history API already exposes: method, target, response state, duration, and payload size.</p>
-					<p>{data.mode === "authenticated" ? "Authenticated users should eventually replace these preview rows with live persisted runs without changing the route structure." : "Guests get a faithful preview so the surface still feels real, even though durable storage is disabled."}</p>
+					<p>{data.mode === "authenticated" ? "Authenticated users now see live persisted runs on the same route structure the preview mode established." : "Guests get a faithful preview so the surface still feels real, even though durable storage is disabled."}</p>
 				</CardContent>
 			</Card>
 

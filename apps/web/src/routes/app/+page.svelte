@@ -7,6 +7,6 @@
 </script>
 
 <section class="space-y-4">
-	<AppShellWorkspace mode={data.mode} entitlements={data.entitlements} />
+	<AppShellWorkspace mode={data.mode} entitlements={data.entitlements} savedRequest={data.savedRequest} />
 	<AppShellUtilityDrawer mode={data.mode} entitlements={data.entitlements} />
 </section>

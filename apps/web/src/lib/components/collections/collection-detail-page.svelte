@@ -33,6 +33,7 @@
 		ready: "default",
 		locked: "secondary",
 		missing: "outline",
+		unavailable: "outline",
 	} as const;
 
 	const requestTone = {
@@ -74,7 +75,13 @@
 						</Badge>
 						<Badge variant="secondary">{detail.accessLabel}</Badge>
 						<Badge variant={badgeTone[detail.status]}>
-							{detail.status === "missing" ? "Unavailable" : detail.status === "ready" ? "Ready" : "Preview"}
+							{detail.status === "missing"
+								? "Unavailable"
+								: detail.status === "unavailable"
+									? "Unavailable"
+									: detail.status === "ready"
+										? "Ready"
+										: "Preview"}
 						</Badge>
 					</div>
 
@@ -132,11 +139,11 @@
 		</Card>
 	{/if}
 
-	{#if detail.status === "missing"}
+	{#if detail.status === "missing" || detail.status === "unavailable"}
 		<Card class="panel-card">
 			<CardHeader class="gap-3">
-				<CardTitle>Collection not seeded</CardTitle>
-				<CardDescription>The requested collection id is not part of the current workspace mock data.</CardDescription>
+				<CardTitle>{detail.status === "unavailable" ? "Collection unavailable" : "Collection not found"}</CardTitle>
+				<CardDescription>{detail.description}</CardDescription>
 			</CardHeader>
 			<CardContent class="flex flex-wrap gap-2">
 				<Button href="/app" variant="outline">Back to app</Button>
@@ -156,9 +163,9 @@
 								<CardTitle>Request groups</CardTitle>
 								<CardDescription>
 									{#if shouldLock}
-										Guest mode shows the seeded request structure, but execution and persistence remain locked.
+										Guest mode keeps the collection shape visible, but execution and persistence remain locked.
 									{:else}
-										Authenticated users get the same collection shell with open actions and reusable launch paths.
+										Authenticated users get live saved requests with reusable launch paths back into `/app`.
 									{/if}
 								</CardDescription>
 							</div>
@@ -210,38 +217,42 @@
 															Open in /app
 															<ArrowRightIcon class="size-4" />
 														</Button>
-														<Button href={request.previewHref} variant="outline" size="sm" class="gap-2">
-															Preview
-															<ExternalLinkIcon class="size-4" />
-														</Button>
+														{#if request.secondaryHref}
+															<Button href={request.secondaryHref} variant="outline" size="sm" class="gap-2">
+																{request.secondaryLabel ?? "Preview"}
+																<ExternalLinkIcon class="size-4" />
+															</Button>
+														{/if}
 													</div>
 												{/if}
 											</div>
 
-											<div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+													<div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
 												<div class="rounded-[16px] border border-border/70 bg-panel-soft px-3 py-3">
 													<p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-text-muted">Response</p>
-													<p class="mt-2 text-sm font-semibold text-text-strong">
-														{request.responseStatus} {request.responseStatusText}
-													</p>
-													<p class="mt-1 text-xs text-text-muted">{request.responseContentType}</p>
+													<p class="mt-2 text-sm font-semibold text-text-strong">{request.responseLabel}</p>
+													<p class="mt-1 text-xs text-text-muted">{request.responseDetail}</p>
 												</div>
 												<div class="rounded-[16px] border border-border/70 bg-panel-soft px-3 py-3">
 													<p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-text-muted">Duration</p>
-													<p class="mt-2 text-sm font-semibold text-text-strong">{request.responseTimeMs} ms</p>
-													<p class="mt-1 text-xs text-text-muted">Measured in the mock workspace state.</p>
+													<p class="mt-2 text-sm font-semibold text-text-strong">{request.durationLabel}</p>
+													<p class="mt-1 text-xs text-text-muted">{request.durationDetail}</p>
 												</div>
 												<div class="rounded-[16px] border border-border/70 bg-panel-soft px-3 py-3">
 													<p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-text-muted">Size</p>
-													<p class="mt-2 text-sm font-semibold text-text-strong">{request.responseSizeLabel}</p>
-													<p class="mt-1 text-xs text-text-muted">Preview payload size.</p>
+													<p class="mt-2 text-sm font-semibold text-text-strong">{request.sizeLabel}</p>
+													<p class="mt-1 text-xs text-text-muted">{request.sizeDetail}</p>
 												</div>
 												<div class="rounded-[16px] border border-border/70 bg-panel-soft px-3 py-3">
 													<p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-text-muted">Overrides</p>
 													<p class="mt-2 text-sm font-semibold text-text-strong">
 														{request.safeOverrides.length > 0 ? request.safeOverrides.join(", ") : "None"}
 													</p>
-													<p class="mt-1 text-xs text-text-muted">Template-defined safe fields.</p>
+													<p class="mt-1 text-xs text-text-muted">
+														{request.safeOverrides.length > 0
+															? "Template-defined safe fields."
+															: "No safe override metadata was stored for this request."}
+													</p>
 												</div>
 											</div>
 										</div>
@@ -259,7 +270,11 @@
 						<div class="flex items-center justify-between gap-3">
 							<div>
 								<CardTitle>Collection metadata</CardTitle>
-								<CardDescription>Seeded facts derived from the route contract and workspace mock state.</CardDescription>
+								<CardDescription>
+									{detail.source === "live"
+										? "Live collection facts returned by the authenticated API."
+										: "Route-level collection facts for the current preview state."}
+								</CardDescription>
 							</div>
 							<Badge variant="outline">{detail.scope}</Badge>
 						</div>
@@ -280,7 +295,11 @@
 				<Card class="panel-card">
 					<CardHeader class="gap-3">
 						<CardTitle>Related collections</CardTitle>
-						<CardDescription>Nearby seeded sets in the current mode.</CardDescription>
+						<CardDescription>
+							{detail.source === "live"
+								? "Other persisted collections visible to this signed-in account."
+								: "Nearby collections visible in the current preview mode."}
+						</CardDescription>
 					</CardHeader>
 					<CardContent class="space-y-3">
 						{#if detail.relatedCollections.length > 0}
@@ -337,10 +356,12 @@
 								Open in /app
 								<ArrowRightIcon class="size-4" />
 							</Button>
-							<Button href={detail.previewHref} size="sm" variant="outline" class="gap-2">
-								Preview in /app
-								<ExternalLinkIcon class="size-4" />
-							</Button>
+							{#if detail.previewHref}
+								<Button href={detail.previewHref} size="sm" variant="outline" class="gap-2">
+									Preview in /app
+									<ExternalLinkIcon class="size-4" />
+								</Button>
+							{/if}
 						</div>
 					</CardContent>
 				</Card>
