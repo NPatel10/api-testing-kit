@@ -14,15 +14,19 @@ import (
 )
 
 type Store struct {
-	pool           *pgxpool.Pool
-	Auth           auth.Repository
-	Collections    collections.Repository
-	SavedRequests  requests.Repository
-	History        history.Repository
-	Templates      *TemplateRepository
-	Usage          *UsageRepository
-	Abuse          *AbuseRepository
-	BlockedTargets *BlockedTargetRepository
+	pool               *pgxpool.Pool
+	Auth               auth.Repository
+	Collections        collections.Repository
+	SavedRequests      requests.Repository
+	History            history.Repository
+	BillingCustomers   *BillingCustomerRepository
+	Subscriptions      *SubscriptionRepository
+	SubscriptionEvents *SubscriptionEventRepository
+	Invoices           *InvoiceRepository
+	Templates          *TemplateRepository
+	Usage              *UsageRepository
+	Abuse              *AbuseRepository
+	BlockedTargets     *BlockedTargetRepository
 }
 
 func Open(ctx context.Context, databaseURL string, maxConns int32) (*Store, error) {
@@ -61,15 +65,19 @@ func NewStore(pool *pgxpool.Pool) *Store {
 	}
 
 	return &Store{
-		pool:           pool,
-		Auth:           NewAuthRepository(pool),
-		Collections:    NewCollectionRepository(pool),
-		SavedRequests:  NewSavedRequestRepository(pool),
-		History:        NewRequestHistoryRepository(pool),
-		Templates:      NewTemplateRepository(pool),
-		Usage:          NewUsageRepository(pool),
-		Abuse:          NewAbuseRepository(pool),
-		BlockedTargets: NewBlockedTargetRepository(pool),
+		pool:               pool,
+		Auth:               NewAuthRepository(pool),
+		Collections:        NewCollectionRepository(pool),
+		SavedRequests:      NewSavedRequestRepository(pool),
+		History:            NewRequestHistoryRepository(pool),
+		BillingCustomers:   NewBillingCustomerRepository(pool),
+		Subscriptions:      NewSubscriptionRepository(pool),
+		SubscriptionEvents: NewSubscriptionEventRepository(pool),
+		Invoices:           NewInvoiceRepository(pool),
+		Templates:          NewTemplateRepository(pool),
+		Usage:              NewUsageRepository(pool),
+		Abuse:              NewAbuseRepository(pool),
+		BlockedTargets:     NewBlockedTargetRepository(pool),
 	}
 }
 
