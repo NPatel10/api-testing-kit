@@ -38,6 +38,18 @@ Returns:
 
 Returns the same payload as `/healthz`.
 
+### `GET /api/v1/admin/abuse`
+
+Returns an admin-only abuse monitoring payload with:
+
+- grouped abuse summaries
+- recent abuse events
+- blocked target records
+
+### `GET /api/v1/admin/blocked-targets`
+
+Returns an admin-only blocked target list.
+
 ## Contract Decisions Locked Now
 
 - Backend runtime: Go in `server`, not Bun.
