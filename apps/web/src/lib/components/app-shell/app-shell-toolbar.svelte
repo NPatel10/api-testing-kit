@@ -6,8 +6,15 @@
 	import SlidersHorizontalIcon from "@lucide/svelte/icons/sliders-horizontal";
 	import CirclePlusIcon from "@lucide/svelte/icons/circle-plus";
 	import BellIcon from "@lucide/svelte/icons/bell";
+	import type { WorkspaceMode } from "$lib/mocks/workspace-state";
 
-	let { mode = "Guest mode" }: { mode?: string } = $props();
+	let {
+		mode = "guest",
+		sessionLabel = "Guest preview",
+	}: {
+		mode?: WorkspaceMode;
+		sessionLabel?: string;
+	} = $props();
 </script>
 
 <div class="flex flex-wrap items-center gap-3 rounded-[24px] border border-border/80 bg-white px-4 py-4 shadow-sm">
@@ -20,7 +27,10 @@
 	</div>
 
 	<div class="flex items-center gap-2">
-		<Badge variant="secondary" class="hidden sm:inline-flex">{mode}</Badge>
+		<Badge variant={mode === "authenticated" ? "default" : "secondary"} class="hidden sm:inline-flex">
+			{sessionLabel}
+		</Badge>
+		<Badge variant="outline" class="hidden md:inline-flex">{mode}</Badge>
 		<Button variant="outline" size="icon-sm" aria-label="Filters">
 			<SlidersHorizontalIcon class="size-4" />
 		</Button>
