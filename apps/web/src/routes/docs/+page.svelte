@@ -6,7 +6,7 @@
 		CardContent,
 		CardDescription,
 		CardHeader,
-		CardTitle
+		CardTitle,
 	} from "$lib/components/ui/card/index.js";
 	import Separator from "$lib/components/ui/separator/separator.svelte";
 	import ArrowRightIcon from "@lucide/svelte/icons/arrow-right";
@@ -21,79 +21,90 @@
 	const quickStart = [
 		{
 			step: "1",
-			title: "Open /app",
+			title: "Open `/app`",
 			description:
-				'Guests can start immediately on the shared workspace. Open a curated template or a sample collection and you are already looking at the real product.'
+				"Guests land on the same workspace as signed-in users. The difference is capability: guest mode stays on allowlisted templates, while authenticated mode unlocks custom execution.",
 		},
 		{
 			step: "2",
-			title: "Choose a request shape",
+			title: "Pick a template or build a request",
 			description:
-				'Pick a method, review the target URL, and inspect the headers, auth, and body tabs. The workspace keeps the request editor visible instead of hiding it behind dialogs.'
+				"Start from a curated guest-safe example, or shape your own request once you are signed in. The editor keeps method, URL, params, headers, auth, and body visible together.",
 		},
 		{
 			step: "3",
-			title: "Send a safe request",
+			title: "Send through backend checks",
 			description:
-				'Guests can only use allowlisted demo targets. Signed-in users unlock validated custom URLs, but private ranges, metadata IPs, and unsupported protocols remain blocked.'
+				"Authenticated requests still get destination validation, redirect checks, payload limits, and timeout limits. The backend is not a generic proxy.",
 		},
 		{
 			step: "4",
-			title: "Read the response",
+			title: "Read the response in one pass",
 			description:
-				'Check status, timing, size, headers, and the pretty/raw tabs together so the result is immediately legible.'
-		}
+				"Use status, duration, size, headers, and the pretty/raw body tabs to decide whether the request is useful, blocked, or broken.",
+		},
+	];
+
+	const modeCards = [
+		{
+			title: "Guest mode",
+			badge: "Allowlisted only",
+			body:
+				"Guests can explore the live app, browse templates, inspect responses, and edit only the safe fields the template exposes. They cannot swap in an arbitrary target URL, save durable history, or use secret environment variables.",
+		},
+		{
+			title: "Authenticated mode",
+			badge: "Full execution",
+			body:
+				"Signed-in users keep the same shell and unlock custom URLs, saved requests, history, collections, and richer request editors. The server still revalidates every target before sending anything outbound.",
+		},
+		{
+			title: "Safety model",
+			badge: "SSRf-aware",
+			body:
+				"The docs and backend agree on the same rules: block localhost, private ranges, metadata IPs, unsupported protocols, large payloads, and long-running requests.",
+		},
 	];
 
 	const requestGuide = [
 		{
 			title: "Method",
-			text: "Start with GET for inspection, then move to POST, PUT, PATCH, or DELETE when you need to validate write paths.",
-			tone: "bg-primary-green-soft text-primary-green-deep"
+			text: "Use GET for inspection and the write methods when you need to verify a mutation path. The app supports GET, POST, PUT, PATCH, and DELETE.",
 		},
 		{
 			title: "URL",
-			text: "Guests stay on curated endpoints. Authenticated users can type custom URLs, but the backend validates every target before sending.",
-			tone: "bg-white text-text-strong"
+			text: "Guest mode keeps the target locked to curated templates. Authenticated mode accepts a custom URL, but the backend validates host, IP, protocol, port, and redirects.",
 		},
 		{
 			title: "Params and headers",
-			text: "Keep query parameters and headers explicit. That makes retries, debugging, and code snippet generation much easier.",
-			tone: "bg-white text-text-strong"
+			text: "Keep overrides explicit. That keeps the request easy to reason about and makes retries, snippets, and debugging much simpler.",
 		},
 		{
-			title: "Body and auth",
-			text: "Use JSON, raw text, or form-urlencoded bodies. Bearer tokens and other custom auth flows unlock after sign-in.",
-			tone: "bg-white text-text-strong"
-		}
+			title: "Auth and body",
+			text: "Use no auth, basic auth, or bearer tokens as needed. Bodies support JSON, raw text, and form-urlencoded modes.",
+		},
 	];
 
 	const responseGuide = [
-		"Status badge and success or failure signal",
-		"Response time and payload size",
-		"Content type and header inspection",
-		"Pretty, raw, and headers views"
+		"Status and failure state first",
+		"Response time and payload size next",
+		"Headers and content type for context",
+		"Pretty, raw, and headers views for the payload",
 	];
 
-	const collectionFlow = [
-		"Save a request once it is useful.",
-		"Group related requests into a collection.",
-		"Re-run from history or collection detail later.",
-		"Keep reusable examples in the same workspace language."
+	const templateGuide = [
+		"Templates are curated examples, not free-form proxies.",
+		"Each template keeps a fixed allowlisted target.",
+		"Guest-safe overrides are limited to the fields the template exposes.",
+		"Templates are meant to get a user productive fast, not hide the app behind demo-only fake data.",
 	];
 
-	const guestCapabilities = [
-		"Browse templates and sample collections",
-		"Edit only the safe fields exposed by the template",
-		"Run only allowlisted demo endpoints",
-		"See the full shell with locked actions instead of fake placeholders"
-	];
-
-	const signedInUnlocks = [
-		"Custom target URLs with backend validation",
-		"Saved requests and durable history",
-		"Collections with re-run and organize flows",
-		"Auth headers, body editors, and richer execution controls"
+	const safetyGuide = [
+		"Guests cannot target arbitrary external domains.",
+		"Authenticated requests still fail closed on blocked destinations.",
+		"Private networks, metadata IPs, and unsupported protocols are blocked.",
+		"Request and response sizes are capped so the UI stays usable.",
+		"Redirects are limited and revalidated before following them.",
 	];
 </script>
 
@@ -101,7 +112,7 @@
 	<title>Docs - API Testing Kit quick start</title>
 	<meta
 		name="description"
-		content="Quick-start documentation for API Testing Kit with request building, response inspection, collections, and the guest versus signed-in model."
+		content="Quick-start docs for API Testing Kit covering guest mode, authenticated execution, templates, response inspection, and outbound safety rules."
 	/>
 </svelte:head>
 
@@ -122,14 +133,15 @@
 						</div>
 						<div>
 							<p class="text-sm font-semibold tracking-tight text-text-strong">API Testing Kit Docs</p>
-							<p class="text-xs text-text-muted">Quick start guidance for guests and signed-in users</p>
+							<p class="text-xs text-text-muted">Quick start for the shared guest and authenticated workspace</p>
 						</div>
 					</div>
 
 					<div class="flex flex-wrap items-center gap-2 text-sm">
 						<a href="#quick-start" class="rounded-full px-4 py-2 text-text-body transition hover:bg-surface-soft hover:text-text-strong">Quick start</a>
+						<a href="#modes" class="rounded-full px-4 py-2 text-text-body transition hover:bg-surface-soft hover:text-text-strong">Modes</a>
 						<a href="#request-builder" class="rounded-full px-4 py-2 text-text-body transition hover:bg-surface-soft hover:text-text-strong">Requests</a>
-						<a href="#response-reading" class="rounded-full px-4 py-2 text-text-body transition hover:bg-surface-soft hover:text-text-strong">Responses</a>
+						<a href="#safety" class="rounded-full px-4 py-2 text-text-body transition hover:bg-surface-soft hover:text-text-strong">Safety</a>
 						<a href="/app" class="rounded-full bg-primary-green px-5 py-2.5 font-medium text-white shadow-[0_12px_28px_rgba(31,122,77,0.28)] transition hover:bg-primary-green-hover">Open app</a>
 					</div>
 				</div>
@@ -142,39 +154,39 @@
 							<Badge variant="secondary" class="w-fit bg-primary-green-soft text-primary-green-deep">Quick start guide</Badge>
 							<div class="space-y-4">
 								<h1 class="max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl">
-									Learn the product in a few minutes, then move straight into the workspace.
+									Use the docs to get productive fast, not to hide the product behind fluff.
 								</h1>
 								<p class="max-w-2xl text-sm leading-7 text-text-body sm:text-base">
-									This page is the shortest path from first visit to a useful request. It explains how to open the app, shape a request, read the response, and understand what stays locked in guest mode.
+									API Testing Kit is a shared `/app` workspace with two capability levels. Guests explore curated templates and locked surfaces. Signed-in users unlock custom request execution, while the backend still enforces safety checks on every outbound call.
 								</p>
 							</div>
 
 							<div class="flex flex-wrap gap-3">
 								<Button href="/app" size="lg" class="rounded-full bg-primary-green px-6 text-white hover:bg-primary-green-hover">
 									<PlayIcon class="size-4" />
-									Open /app
+									Open `/app`
 								</Button>
-								<Button href="/features" variant="outline" size="lg" class="rounded-full border-border bg-white px-6">
+								<Button href="/templates" variant="outline" size="lg" class="rounded-full border-border bg-white px-6">
 									<SparklesIcon class="size-4" />
-									Review features
+									Browse templates
 								</Button>
 							</div>
 
 							<div class="grid gap-3 sm:grid-cols-3">
 								<div class="metric-card p-4">
-									<p class="text-xs uppercase tracking-[0.24em] text-text-muted">Focus</p>
-									<p class="mt-2 text-sm font-semibold">Request first</p>
-									<p class="mt-1 text-xs leading-5 text-text-muted">Build and inspect before you save anything.</p>
+									<p class="text-xs uppercase tracking-[0.24em] text-text-muted">Workspace</p>
+									<p class="mt-2 text-sm font-semibold">One route, two modes</p>
+									<p class="mt-1 text-xs leading-5 text-text-muted">Guest and authenticated users share the same shell.</p>
 								</div>
 								<div class="metric-card p-4">
-									<p class="text-xs uppercase tracking-[0.24em] text-text-muted">Mode</p>
-									<p class="mt-2 text-sm font-semibold">Guest or signed in</p>
-									<p class="mt-1 text-xs leading-5 text-text-muted">Same workspace, different capability levels.</p>
+									<p class="text-xs uppercase tracking-[0.24em] text-text-muted">Execution</p>
+									<p class="mt-2 text-sm font-semibold">Validated server-side</p>
+									<p class="mt-1 text-xs leading-5 text-text-muted">The server blocks unsafe targets and oversized payloads.</p>
 								</div>
 								<div class="metric-card p-4">
-									<p class="text-xs uppercase tracking-[0.24em] text-text-muted">Safety</p>
-									<p class="mt-2 text-sm font-semibold">Validated execution</p>
-									<p class="mt-1 text-xs leading-5 text-text-muted">The backend blocks dangerous outbound targets.</p>
+									<p class="text-xs uppercase tracking-[0.24em] text-text-muted">Output</p>
+									<p class="mt-2 text-sm font-semibold">Readable response state</p>
+									<p class="mt-1 text-xs leading-5 text-text-muted">Inspect headers, timing, size, and body together.</p>
 								</div>
 							</div>
 						</div>
@@ -186,7 +198,7 @@
 										<CardTitle>Fast path</CardTitle>
 										<CardDescription>Use this sequence the first time you open the app.</CardDescription>
 									</div>
-									<Badge variant="outline" class="border-primary-green-soft bg-white text-primary-green-deep">3 min</Badge>
+									<Badge variant="outline" class="border-primary-green-soft bg-white text-primary-green-deep">4 steps</Badge>
 								</div>
 							</CardHeader>
 							<CardContent class="space-y-4 p-5">
@@ -205,12 +217,40 @@
 						</Card>
 					</section>
 
+					<section id="modes" class="scroll-mt-24 space-y-4">
+						<div class="max-w-3xl">
+							<p class="section-title">App modes</p>
+							<h2 class="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Guest mode stays real, authenticated mode unlocks execution</h2>
+							<p class="mt-3 text-sm leading-6 text-text-body sm:text-base">
+								The workspace is intentionally split by capability, not by route. Guests see the actual interface with locked actions. Signed-in users get custom request execution and persistence, but not an unsafe proxy.
+							</p>
+						</div>
+
+						<div class="grid gap-4 md:grid-cols-3">
+							{#each modeCards as card}
+								<Card class="panel-card">
+									<CardHeader class="gap-2">
+										<div class="flex items-center justify-between gap-3">
+											<CardTitle class="text-base">{card.title}</CardTitle>
+											<Badge variant="outline">{card.badge}</Badge>
+										</div>
+									</CardHeader>
+									<CardContent>
+										<p class="rounded-[18px] border border-border/70 bg-white px-4 py-4 text-sm leading-6 text-text-body">
+											{card.body}
+										</p>
+									</CardContent>
+								</Card>
+							{/each}
+						</div>
+					</section>
+
 					<section id="request-builder" class="scroll-mt-24 space-y-4">
 						<div class="max-w-3xl">
 							<p class="section-title">Request builder</p>
-							<h2 class="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Shape the request before you hit send</h2>
+							<h2 class="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Keep the full request visible while you edit it</h2>
 							<p class="mt-3 text-sm leading-6 text-text-body sm:text-base">
-								The editor keeps the important pieces visible together: method, URL, params, headers, auth, and body. That makes the workflow easy to explain and easy to repeat.
+								The editor is built around the same request shape documented in the plan: method, URL, params, headers, auth, and body. That keeps the workflow fast enough for debugging and precise enough for demos.
 							</p>
 						</div>
 
@@ -221,7 +261,7 @@
 										<CardTitle class="text-base">{item.title}</CardTitle>
 									</CardHeader>
 									<CardContent>
-										<div class={`rounded-[18px] border border-border/70 px-4 py-4 text-sm leading-6 ${item.tone}`}>
+										<div class="rounded-[18px] border border-border/70 bg-white px-4 py-4 text-sm leading-6 text-text-body">
 											{item.text}
 										</div>
 									</CardContent>
@@ -237,20 +277,20 @@ X-Demo-Mode: guest</code></pre>
 						</div>
 					</section>
 
-					<section id="response-reading" class="scroll-mt-24 space-y-4">
+					<section id="responses" class="scroll-mt-24 space-y-4">
 						<div class="max-w-3xl">
 							<p class="section-title">Response inspection</p>
-							<h2 class="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Read status, size, and body together</h2>
+							<h2 class="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Read the result before you decide what to do next</h2>
 							<p class="mt-3 text-sm leading-6 text-text-body sm:text-base">
-								The response area should answer the only questions that matter at a glance: did it work, how long did it take, how much data came back, and what was actually returned.
+								The response viewer is meant to answer the practical questions quickly: did the call succeed, how long did it take, how much data came back, and what exactly did the server return.
 							</p>
 						</div>
 
 						<div class="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
 							<Card class="panel-card">
 								<CardHeader class="gap-2">
-									<CardTitle class="text-base">What to look for</CardTitle>
-									<CardDescription>Use the metadata first, then inspect the body.</CardDescription>
+									<CardTitle class="text-base">What to read first</CardTitle>
+									<CardDescription>Use metadata before diving into the body.</CardDescription>
 								</CardHeader>
 								<CardContent class="space-y-3">
 									{#each responseGuide as item}
@@ -300,14 +340,14 @@ X-Demo-Mode: guest</code></pre>
 						</div>
 					</section>
 
-					<section id="collections" class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+					<section id="templates" class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
 						<Card class="panel-card">
 							<CardHeader class="gap-2">
-								<CardTitle class="text-base">Collections</CardTitle>
-								<CardDescription>Use collections to keep related requests grouped and re-runnable.</CardDescription>
+								<CardTitle class="text-base">Templates</CardTitle>
+								<CardDescription>Templates are the fastest safe entry point into `/app`.</CardDescription>
 							</CardHeader>
 							<CardContent class="space-y-3">
-								{#each collectionFlow as item}
+								{#each templateGuide as item}
 									<div class="flex items-start gap-3 rounded-[18px] border border-border/70 bg-white px-4 py-3">
 										<Code2Icon class="mt-0.5 size-4 text-primary-green" />
 										<p class="text-sm leading-6 text-text-body">{item}</p>
@@ -319,27 +359,33 @@ X-Demo-Mode: guest</code></pre>
 						<Card class="panel-card">
 							<CardHeader class="gap-2">
 								<CardTitle class="text-base">What guests can do</CardTitle>
-								<CardDescription>The guest experience is real, but intentionally constrained.</CardDescription>
+								<CardDescription>Guests should understand the product, not bounce off a fake demo.</CardDescription>
 							</CardHeader>
 							<CardContent class="space-y-3">
-								{#each guestCapabilities as item}
-									<div class="flex items-start gap-3 rounded-[18px] border border-border/70 bg-white px-4 py-3">
-										<ShieldCheckIcon class="mt-0.5 size-4 text-success" />
-										<p class="text-sm leading-6 text-text-body">{item}</p>
-									</div>
-								{/each}
+								<div class="flex items-start gap-3 rounded-[18px] border border-border/70 bg-white px-4 py-3">
+									<ShieldCheckIcon class="mt-0.5 size-4 text-success" />
+									<p class="text-sm leading-6 text-text-body">Browse templates and example collections.</p>
+								</div>
+								<div class="flex items-start gap-3 rounded-[18px] border border-border/70 bg-white px-4 py-3">
+									<ShieldCheckIcon class="mt-0.5 size-4 text-success" />
+									<p class="text-sm leading-6 text-text-body">Edit only the template-defined safe overrides.</p>
+								</div>
+								<div class="flex items-start gap-3 rounded-[18px] border border-border/70 bg-white px-4 py-3">
+									<ShieldCheckIcon class="mt-0.5 size-4 text-success" />
+									<p class="text-sm leading-6 text-text-body">Run only allowlisted endpoints with visible lock states for everything else.</p>
+								</div>
 							</CardContent>
 						</Card>
 					</section>
 
-					<section class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+					<section id="safety" class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
 						<Card class="panel-card">
 							<CardHeader class="gap-2">
-								<CardTitle class="text-base">What unlocks after sign-in</CardTitle>
-								<CardDescription>Authenticated mode keeps the same shell and removes the artificial limits.</CardDescription>
+								<CardTitle class="text-base">Safety rules</CardTitle>
+								<CardDescription>The backend is designed to fail closed.</CardDescription>
 							</CardHeader>
 							<CardContent class="space-y-3">
-								{#each signedInUnlocks as item}
+								{#each safetyGuide as item}
 									<div class="flex items-start gap-3 rounded-[18px] border border-border/70 bg-white px-4 py-3">
 										<LockIcon class="mt-0.5 size-4 text-primary-green" />
 										<p class="text-sm leading-6 text-text-body">{item}</p>
@@ -348,10 +394,10 @@ X-Demo-Mode: guest</code></pre>
 							</CardContent>
 						</Card>
 
-						<Card class="panel-card bg-[linear-gradient(135deg,rgba(31,122,77,0.14),rgba(255,255,255,0.98))]">
+						<Card class="panel-card bg-[linear-gradient(135deg,rgba(31,122,77,0.16),rgba(255,255,255,0.98))]">
 							<CardHeader class="gap-2">
 								<CardTitle class="text-base">If something is locked</CardTitle>
-								<CardDescription>Locked controls should be visible, not hidden.</CardDescription>
+								<CardDescription>Visible, deliberate, and explained.</CardDescription>
 							</CardHeader>
 							<CardContent class="space-y-3">
 								<div class="rounded-[18px] border border-border/70 bg-white p-4">
@@ -360,9 +406,9 @@ X-Demo-Mode: guest</code></pre>
 											<LockIcon class="size-4" />
 										</div>
 										<div>
-											<p class="text-sm font-semibold">The workspace stays visible.</p>
+											<p class="text-sm font-semibold">The control stays on screen.</p>
 											<p class="mt-1 text-sm leading-6 text-text-body">
-												Gated features should feel deliberate: the user can see what exists, why it is blocked, and what signing in changes.
+												The UI should show what exists, why it is blocked, and what signing in changes. Hidden controls make the product feel unfinished.
 											</p>
 										</div>
 									</div>
@@ -371,11 +417,11 @@ X-Demo-Mode: guest</code></pre>
 								<div class="flex flex-wrap gap-3">
 									<Button href="/app" size="sm" class="rounded-full bg-primary-green px-4 text-white hover:bg-primary-green-hover">
 										<ArrowRightIcon class="size-4" />
-										Continue in /app
+										Continue in `/app`
 									</Button>
-									<Button href="/" variant="outline" size="sm" class="rounded-full border-border bg-white px-4">
+									<Button href="/features" variant="outline" size="sm" class="rounded-full border-border bg-white px-4">
 										<SearchIcon class="size-4" />
-										Review landing page
+										Review features
 									</Button>
 								</div>
 							</CardContent>
@@ -387,23 +433,31 @@ X-Demo-Mode: guest</code></pre>
 					<Card class="panel-card">
 						<CardHeader class="gap-2">
 							<CardTitle class="text-base">On this page</CardTitle>
-							<CardDescription>Jump straight to the section you need.</CardDescription>
+							<CardDescription>Jump to the section you need.</CardDescription>
 						</CardHeader>
 						<CardContent class="space-y-2">
 							<a href="#quick-start" class="flex items-center justify-between rounded-[16px] border border-border/70 bg-white px-4 py-3 text-sm text-text-body transition hover:border-primary-green-soft hover:bg-primary-green-soft/40 hover:text-text-strong">
 								<span>Quick start</span>
 								<ArrowRightIcon class="size-4" />
 							</a>
+							<a href="#modes" class="flex items-center justify-between rounded-[16px] border border-border/70 bg-white px-4 py-3 text-sm text-text-body transition hover:border-primary-green-soft hover:bg-primary-green-soft/40 hover:text-text-strong">
+								<span>App modes</span>
+								<ArrowRightIcon class="size-4" />
+							</a>
 							<a href="#request-builder" class="flex items-center justify-between rounded-[16px] border border-border/70 bg-white px-4 py-3 text-sm text-text-body transition hover:border-primary-green-soft hover:bg-primary-green-soft/40 hover:text-text-strong">
 								<span>Request builder</span>
 								<ArrowRightIcon class="size-4" />
 							</a>
-							<a href="#response-reading" class="flex items-center justify-between rounded-[16px] border border-border/70 bg-white px-4 py-3 text-sm text-text-body transition hover:border-primary-green-soft hover:bg-primary-green-soft/40 hover:text-text-strong">
-								<span>Response reading</span>
+							<a href="#responses" class="flex items-center justify-between rounded-[16px] border border-border/70 bg-white px-4 py-3 text-sm text-text-body transition hover:border-primary-green-soft hover:bg-primary-green-soft/40 hover:text-text-strong">
+								<span>Responses</span>
 								<ArrowRightIcon class="size-4" />
 							</a>
-							<a href="#collections" class="flex items-center justify-between rounded-[16px] border border-border/70 bg-white px-4 py-3 text-sm text-text-body transition hover:border-primary-green-soft hover:bg-primary-green-soft/40 hover:text-text-strong">
-								<span>Collections</span>
+							<a href="#templates" class="flex items-center justify-between rounded-[16px] border border-border/70 bg-white px-4 py-3 text-sm text-text-body transition hover:border-primary-green-soft hover:bg-primary-green-soft/40 hover:text-text-strong">
+								<span>Templates</span>
+								<ArrowRightIcon class="size-4" />
+							</a>
+							<a href="#safety" class="flex items-center justify-between rounded-[16px] border border-border/70 bg-white px-4 py-3 text-sm text-text-body transition hover:border-primary-green-soft hover:bg-primary-green-soft/40 hover:text-text-strong">
+								<span>Safety</span>
 								<ArrowRightIcon class="size-4" />
 							</a>
 						</CardContent>
@@ -415,24 +469,24 @@ X-Demo-Mode: guest</code></pre>
 							<CardDescription>Use this as a concise tour through the product.</CardDescription>
 						</CardHeader>
 						<CardContent class="space-y-3 text-sm leading-6 text-text-body">
-							<p>1. Open the app and choose a template.</p>
-							<p>2. Edit only the safe fields you need.</p>
-							<p>3. Send the request and inspect the response.</p>
-							<p>4. Save useful work into a collection once you sign in.</p>
+							<p>1. Open `/app` and pick a template.</p>
+							<p>2. Edit the request with the fields the mode allows.</p>
+							<p>3. Inspect the response metadata and body.</p>
+							<p>4. Sign in when you need persistence or custom execution.</p>
 						</CardContent>
 					</Card>
 
 					<Card class="panel-card bg-[linear-gradient(135deg,rgba(31,122,77,0.16),rgba(255,255,255,0.98))]">
 						<CardHeader class="gap-2">
-							<CardTitle class="text-base">Need the fastest path?</CardTitle>
-							<CardDescription>Go straight to the live workspace.</CardDescription>
+							<CardTitle class="text-base">Need the live app?</CardTitle>
+							<CardDescription>Docs explain the surface, but the product lives in `/app`.</CardDescription>
 						</CardHeader>
 						<CardContent class="space-y-3">
 							<p class="text-sm leading-6 text-text-body">
-								The docs are here to reduce friction, but the product experience lives in the shared `/app` route.
+								Use the docs to orient yourself, then move into the shared workspace. That is where guest mode, authenticated mode, templates, and response inspection all come together.
 							</p>
 							<Button href="/app" class="w-full justify-between rounded-full bg-primary-green px-5 text-white hover:bg-primary-green-hover">
-								<span>Open /app</span>
+								<span>Open `/app`</span>
 								<ArrowRightIcon class="size-4" />
 							</Button>
 						</CardContent>
