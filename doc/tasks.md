@@ -41,6 +41,7 @@ These items should be completed before most parallel feature work starts.
 
 ### BL1. Project Scaffold
 Owner: `Agent Group A`
+Status: `completed` on `2026-03-26`
 
 Scope:
 - Create the base SvelteKit app structure.
@@ -58,6 +59,7 @@ Unblocks:
 
 ### BL2. Database Schema
 Owner: `Agent Group C`
+Status: `completed` on `2026-03-26`
 
 Scope:
 - Create `schema.sql`.
@@ -76,6 +78,7 @@ Unblocks:
 
 ### BL3. Route and App Contract
 Owner: `Agent Group A`
+Status: `completed` on `2026-03-26`
 
 Scope:
 - Confirm the `/app` shared guest/authenticated model.
@@ -399,6 +402,7 @@ If monetization is not part of the current milestone, skip this track entirely.
 
 ### E1. Plan And Entitlement Model
 Owner: `Agent Group E`
+Status: `completed` on `2026-03-26`
 
 Scope:
 - Define plan tiers and feature entitlements.
@@ -410,6 +414,7 @@ Depends on:
 
 ### E2. Billing Customer And Subscription Storage
 Owner: `Agent Group E`
+Status: `completed` on `2026-03-26`
 
 Scope:
 - Store billing customer IDs, subscription status, renewal state, and plan mapping.
@@ -421,6 +426,7 @@ Depends on:
 
 ### E3. Access Control By Plan
 Owner: `Agent Group E`
+Status: `completed` on `2026-03-26`
 
 Scope:
 - Gate custom URL execution, saved history depth, env vars, and shared links by entitlement.
@@ -433,6 +439,7 @@ Depends on:
 
 ### E4. Billing Provider Integration Stub
 Owner: `Agent Group E`
+Status: `completed` on `2026-03-26`
 
 Scope:
 - Add webhook endpoint skeleton.
