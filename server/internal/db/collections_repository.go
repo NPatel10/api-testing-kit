@@ -57,6 +57,39 @@ func (r *CollectionRepository) ListByOwner(ctx context.Context, ownerUserID stri
 	return items, rows.Err()
 }
 
+func (r *CollectionRepository) GetByID(ctx context.Context, id string, ownerUserID string) (collections.Collection, error) {
+	row := r.pool.QueryRow(ctx, `
+		SELECT
+			id,
+			owner_user_id,
+			name,
+			slug,
+			COALESCE(description, ''),
+			visibility,
+			COALESCE(color, ''),
+			sort_order,
+			shared_token,
+			metadata,
+			created_at,
+			updated_at,
+			deleted_at
+		FROM collections
+		WHERE id = $1
+		  AND owner_user_id = $2
+		  AND deleted_at IS NULL
+	`, id, ownerUserID)
+
+	item, err := scanCollection(row.Scan)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return collections.Collection{}, collections.ErrNotFound
+		}
+		return collections.Collection{}, err
+	}
+
+	return item, nil
+}
+
 func (r *CollectionRepository) Create(ctx context.Context, params collections.CreateParams) (collections.Collection, error) {
 	row := r.pool.QueryRow(ctx, `
 		INSERT INTO collections (

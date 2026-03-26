@@ -12,6 +12,7 @@ import (
 
 	"api-testing-kit/server/internal/auth"
 	"api-testing-kit/server/internal/collections"
+	"api-testing-kit/server/internal/requests"
 )
 
 func TestCollectionsCRUD(t *testing.T) {
@@ -28,7 +29,8 @@ func TestCollectionsCRUD(t *testing.T) {
 	}
 
 	collectionsRepo := newFakeCollectionsRepo()
-	handler := NewCollectionsHandler(collections.NewService(collectionsRepo), authService)
+	requestsRepo := newFakeCollectionsSavedRequestRepo()
+	handler := NewCollectionsHandler(collections.NewService(collectionsRepo), requests.NewService(requestsRepo), authService)
 	mux := http.NewServeMux()
 	handler.Register(mux)
 
@@ -45,6 +47,57 @@ func TestCollectionsCRUD(t *testing.T) {
 	var created collections.Collection
 	if err := json.Unmarshal(createRR.Body.Bytes(), &created); err != nil {
 		t.Fatalf("failed to decode created collection: %v", err)
+	}
+
+	ownerID := authResult.User.ID
+	requestsRepo.items["request-2"] = requests.SavedRequest{
+		ID:           "request-2",
+		CollectionID: &created.ID,
+		OwnerUserID:  &ownerID,
+		Name:         "Second",
+		Method:       http.MethodPost,
+		URL:          "https://api.example.com/second",
+		SortOrder:    2,
+		CreatedAt:    time.Now().UTC(),
+		UpdatedAt:    time.Now().UTC(),
+	}
+	requestsRepo.items["request-1"] = requests.SavedRequest{
+		ID:           "request-1",
+		CollectionID: &created.ID,
+		OwnerUserID:  &ownerID,
+		Name:         "First",
+		Method:       http.MethodGet,
+		URL:          "https://api.example.com/first",
+		SortOrder:    1,
+		CreatedAt:    time.Now().UTC().Add(-time.Minute),
+		UpdatedAt:    time.Now().UTC().Add(-time.Minute),
+	}
+
+	detailReq := httptest.NewRequest(http.MethodGet, "/api/v1/collections/"+created.ID, nil)
+	detailReq.SetPathValue("id", created.ID)
+	detailReq.AddCookie(&http.Cookie{Name: sessionCookieName, Value: authResult.Token})
+	detailRR := httptest.NewRecorder()
+	mux.ServeHTTP(detailRR, detailReq)
+
+	if detailRR.Code != http.StatusOK {
+		t.Fatalf("expected detail status %d, got %d", http.StatusOK, detailRR.Code)
+	}
+
+	var detailPayload struct {
+		Collection    collections.Collection  `json:"collection"`
+		SavedRequests []requests.SavedRequest `json:"savedRequests"`
+	}
+	if err := json.Unmarshal(detailRR.Body.Bytes(), &detailPayload); err != nil {
+		t.Fatalf("failed to decode collection detail: %v", err)
+	}
+	if detailPayload.Collection.ID != created.ID {
+		t.Fatalf("expected detail for collection %q, got %q", created.ID, detailPayload.Collection.ID)
+	}
+	if len(detailPayload.SavedRequests) != 2 {
+		t.Fatalf("expected 2 saved requests, got %d", len(detailPayload.SavedRequests))
+	}
+	if detailPayload.SavedRequests[0].SortOrder != 1 || detailPayload.SavedRequests[1].SortOrder != 2 {
+		t.Fatalf("expected saved requests to be sorted by sort order, got %+v", detailPayload.SavedRequests)
 	}
 
 	listReq := httptest.NewRequest(http.MethodGet, "/api/v1/collections", nil)
@@ -99,6 +152,14 @@ func (r *fakeCollectionsRepo) ListByOwner(ctx context.Context, ownerUserID strin
 	return items, nil
 }
 
+func (r *fakeCollectionsRepo) GetByID(ctx context.Context, id string, ownerUserID string) (collections.Collection, error) {
+	item, ok := r.items[id]
+	if !ok || item.OwnerUserID == nil || *item.OwnerUserID != ownerUserID || item.DeletedAt != nil {
+		return collections.Collection{}, collections.ErrNotFound
+	}
+	return item, nil
+}
+
 func (r *fakeCollectionsRepo) Create(ctx context.Context, params collections.CreateParams) (collections.Collection, error) {
 	r.next++
 	now := time.Now().UTC()
@@ -142,4 +203,49 @@ func (r *fakeCollectionsRepo) Delete(ctx context.Context, id string, ownerUserID
 	item.DeletedAt = &now
 	r.items[id] = item
 	return nil
+}
+
+type fakeCollectionsSavedRequestRepo struct {
+	items map[string]requests.SavedRequest
+}
+
+func newFakeCollectionsSavedRequestRepo() *fakeCollectionsSavedRequestRepo {
+	return &fakeCollectionsSavedRequestRepo{items: make(map[string]requests.SavedRequest)}
+}
+
+func (r *fakeCollectionsSavedRequestRepo) GetByID(ctx context.Context, id string, ownerUserID string) (requests.SavedRequest, error) {
+	item, ok := r.items[id]
+	if !ok || item.OwnerUserID == nil || *item.OwnerUserID != ownerUserID {
+		return requests.SavedRequest{}, requests.ErrNotFound
+	}
+	return item, nil
+}
+
+func (r *fakeCollectionsSavedRequestRepo) ListByCollection(ctx context.Context, collectionID string, ownerUserID string) ([]requests.SavedRequest, error) {
+	items := make([]requests.SavedRequest, 0)
+	for _, item := range r.items {
+		if item.CollectionID != nil && *item.CollectionID == collectionID && item.OwnerUserID != nil && *item.OwnerUserID == ownerUserID {
+			items = append(items, item)
+		}
+	}
+	for i := 0; i < len(items); i++ {
+		for j := i + 1; j < len(items); j++ {
+			if items[j].SortOrder < items[i].SortOrder {
+				items[i], items[j] = items[j], items[i]
+			}
+		}
+	}
+	return items, nil
+}
+
+func (r *fakeCollectionsSavedRequestRepo) Create(ctx context.Context, params requests.CreateParams) (requests.SavedRequest, error) {
+	return requests.SavedRequest{}, requests.ErrUnavailable
+}
+
+func (r *fakeCollectionsSavedRequestRepo) Update(ctx context.Context, params requests.UpdateParams) (requests.SavedRequest, error) {
+	return requests.SavedRequest{}, requests.ErrUnavailable
+}
+
+func (r *fakeCollectionsSavedRequestRepo) Delete(ctx context.Context, id string, ownerUserID string) error {
+	return requests.ErrUnavailable
 }

@@ -7,11 +7,18 @@ import (
 
 	"api-testing-kit/server/internal/auth"
 	"api-testing-kit/server/internal/collections"
+	"api-testing-kit/server/internal/requests"
 )
 
 type CollectionsHandler struct {
-	service *collections.Service
-	auth    *auth.Service
+	service  *collections.Service
+	requests *requests.Service
+	auth     *auth.Service
+}
+
+type collectionDetailResponse struct {
+	Collection    collections.Collection  `json:"collection"`
+	SavedRequests []requests.SavedRequest `json:"savedRequests"`
 }
 
 type collectionRequest struct {
@@ -24,15 +31,17 @@ type collectionRequest struct {
 	Metadata    json.RawMessage         `json:"metadata,omitempty"`
 }
 
-func NewCollectionsHandler(service *collections.Service, authService *auth.Service) *CollectionsHandler {
+func NewCollectionsHandler(service *collections.Service, requestsService *requests.Service, authService *auth.Service) *CollectionsHandler {
 	return &CollectionsHandler{
-		service: service,
-		auth:    authService,
+		service:  service,
+		requests: requestsService,
+		auth:     authService,
 	}
 }
 
 func (h *CollectionsHandler) Register(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/v1/collections", h.handleList)
+	mux.HandleFunc("GET /api/v1/collections/{id}", h.handleGet)
 	mux.HandleFunc("POST /api/v1/collections", h.handleCreate)
 	mux.HandleFunc("PATCH /api/v1/collections/{id}", h.handleUpdate)
 	mux.HandleFunc("DELETE /api/v1/collections/{id}", h.handleDelete)
@@ -51,6 +60,35 @@ func (h *CollectionsHandler) handleList(w http.ResponseWriter, r *http.Request) 
 	}
 
 	writeJSON(w, http.StatusOK, map[string]any{"collections": items})
+}
+
+func (h *CollectionsHandler) handleGet(w http.ResponseWriter, r *http.Request) {
+	if h == nil || h.service == nil || h.requests == nil || h.auth == nil {
+		writeError(w, http.StatusServiceUnavailable, "collections_unavailable", "collections are temporarily unavailable")
+		return
+	}
+
+	user, ok := h.requireUser(w, r)
+	if !ok {
+		return
+	}
+
+	item, err := h.service.Get(r.Context(), r.PathValue("id"), user.ID)
+	if err != nil {
+		writeCollectionError(w, err)
+		return
+	}
+
+	savedRequests, err := h.requests.ListByCollection(r.Context(), item.ID, user.ID)
+	if err != nil {
+		writeSavedRequestError(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, collectionDetailResponse{
+		Collection:    item,
+		SavedRequests: savedRequests,
+	})
 }
 
 func (h *CollectionsHandler) handleCreate(w http.ResponseWriter, r *http.Request) {

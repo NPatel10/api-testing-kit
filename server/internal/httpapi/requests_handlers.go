@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
+	"strings"
+	"time"
 
 	"api-testing-kit/server/internal/auth"
 	"api-testing-kit/server/internal/history"
@@ -145,12 +148,30 @@ func (h *RequestsHandler) handleListHistory(w http.ResponseWriter, r *http.Reque
 	if !ok {
 		return
 	}
-	items, err := h.history.List(r.Context(), user.ID, 20)
+
+	query, err := parseHistoryListQuery(r)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_history", err.Error())
+		return
+	}
+
+	result, err := h.history.ListWithFilters(r.Context(), history.ListQuery{
+		UserID: user.ID,
+		Status: query.Status,
+		Method: query.Method,
+		Domain: query.Domain,
+		Date:   query.Date,
+		Page:   query.Page,
+		Limit:  query.Limit,
+	})
 	if err != nil {
 		writeHistoryError(w, err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"history": items})
+	writeJSON(w, http.StatusOK, map[string]any{
+		"history":    result.Items,
+		"pagination": result.Pagination,
+	})
 }
 
 func (h *RequestsHandler) requireUser(w http.ResponseWriter, r *http.Request) (auth.UserRecord, bool) {
@@ -201,4 +222,53 @@ func normalizeOptionalJSON(value json.RawMessage) *json.RawMessage {
 	}
 	copyValue := json.RawMessage(append([]byte(nil), value...))
 	return &copyValue
+}
+
+type historyListQuery struct {
+	Status string
+	Method string
+	Domain string
+	Date   *time.Time
+	Page   int32
+	Limit  int32
+}
+
+func parseHistoryListQuery(r *http.Request) (historyListQuery, error) {
+	query := historyListQuery{
+		Status: strings.TrimSpace(r.URL.Query().Get("status")),
+		Method: strings.TrimSpace(r.URL.Query().Get("method")),
+		Domain: strings.TrimSpace(r.URL.Query().Get("domain")),
+		Page:   1,
+		Limit:  20,
+	}
+
+	if value := strings.TrimSpace(r.URL.Query().Get("page")); value != "" {
+		page, err := strconv.Atoi(value)
+		if err != nil || page <= 0 {
+			return historyListQuery{}, errors.New("page must be a positive integer")
+		}
+		query.Page = int32(page)
+	}
+
+	if value := strings.TrimSpace(r.URL.Query().Get("limit")); value != "" {
+		limit, err := strconv.Atoi(value)
+		if err != nil || limit <= 0 {
+			return historyListQuery{}, errors.New("limit must be a positive integer")
+		}
+		if limit > 100 {
+			limit = 100
+		}
+		query.Limit = int32(limit)
+	}
+
+	if value := strings.TrimSpace(r.URL.Query().Get("date")); value != "" {
+		parsed, err := time.Parse("2006-01-02", value)
+		if err != nil {
+			return historyListQuery{}, errors.New("date must use YYYY-MM-DD format")
+		}
+		date := time.Date(parsed.Year(), parsed.Month(), parsed.Day(), 0, 0, 0, 0, time.UTC)
+		query.Date = &date
+	}
+
+	return query, nil
 }

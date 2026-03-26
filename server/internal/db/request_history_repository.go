@@ -3,6 +3,8 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strings"
 
 	"api-testing-kit/server/internal/history"
 
@@ -22,7 +24,7 @@ func (r *RequestHistoryRepository) ListByUser(ctx context.Context, userID string
 		SELECT id, user_id, collection_id, saved_request_id, source, status, method, url, final_url, COALESCE(target_host, ''), request_headers, request_query_params, request_auth, request_body, response_status, response_headers, COALESCE(response_body_preview, ''), response_size_bytes, response_time_ms, COALESCE(response_content_type, ''), redirect_count, COALESCE(blocked_reason, ''), COALESCE(error_code, ''), COALESCE(error_message, ''), started_at, completed_at, created_at, metadata
 		FROM request_runs
 		WHERE user_id = $1
-		ORDER BY created_at DESC
+		ORDER BY created_at DESC, id DESC
 		LIMIT $2
 	`, userID, limit)
 	if err != nil {
@@ -38,6 +40,26 @@ func (r *RequestHistoryRepository) ListByUser(ctx context.Context, userID string
 		}
 		items = append(items, item)
 	}
+	return items, rows.Err()
+}
+
+func (r *RequestHistoryRepository) ListByUserWithFilters(ctx context.Context, query history.ListQuery) ([]history.RunRecord, error) {
+	sqlText, args := buildRequestHistoryListQuery(query)
+	rows, err := r.pool.Query(ctx, sqlText, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	items := make([]history.RunRecord, 0)
+	for rows.Next() {
+		item, err := scanRunRecord(rows.Scan)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+
 	return items, rows.Err()
 }
 
@@ -133,4 +155,73 @@ func scanRunRecord(scan func(dest ...any) error) (history.RunRecord, error) {
 		item.CompletedAt = &completedAt.Time
 	}
 	return item, nil
+}
+
+func buildRequestHistoryListQuery(query history.ListQuery) (string, []any) {
+	var builder strings.Builder
+	args := make([]any, 0, 8)
+
+	builder.WriteString(`
+		SELECT id, user_id, collection_id, saved_request_id, source, status, method, url, final_url, COALESCE(target_host, ''), request_headers, request_query_params, request_auth, request_body, response_status, response_headers, COALESCE(response_body_preview, ''), response_size_bytes, response_time_ms, COALESCE(response_content_type, ''), redirect_count, COALESCE(blocked_reason, ''), COALESCE(error_code, ''), COALESCE(error_message, ''), started_at, completed_at, created_at, metadata
+		FROM request_runs
+		WHERE user_id = $1
+	`)
+	args = append(args, query.UserID)
+
+	nextArg := len(args) + 1
+
+	if statuses := normalizeHistoryStatusFilter(query.Status); len(statuses) > 0 {
+		builder.WriteString(fmt.Sprintf(" AND status::text = ANY($%d::text[])\n", nextArg))
+		args = append(args, statuses)
+		nextArg = len(args) + 1
+	}
+
+	if method := strings.TrimSpace(query.Method); method != "" && !strings.EqualFold(method, "all") {
+		builder.WriteString(fmt.Sprintf(" AND method::text = $%d\n", nextArg))
+		args = append(args, strings.ToUpper(method))
+		nextArg = len(args) + 1
+	}
+
+	if domain := strings.TrimSpace(query.Domain); domain != "" && domain != "all" {
+		builder.WriteString(fmt.Sprintf(" AND COALESCE(target_host, '') = $%d\n", nextArg))
+		args = append(args, strings.ToLower(domain))
+		nextArg = len(args) + 1
+	}
+
+	if query.Date != nil {
+		builder.WriteString(fmt.Sprintf(" AND created_at >= $%d AND created_at < ($%d + INTERVAL '1 day')\n", nextArg, nextArg))
+		args = append(args, query.Date.UTC())
+		nextArg = len(args) + 1
+	}
+
+	pageSize := query.Limit
+	if pageSize > 0 {
+		pageSize--
+	}
+	offset := int32(0)
+	if query.Page > 1 && pageSize > 0 {
+		offset = (query.Page - 1) * pageSize
+	}
+
+	queryLimit := normalizeLimit(query.Limit, 21, 101)
+	builder.WriteString(" ORDER BY created_at DESC, id DESC\n")
+	builder.WriteString(fmt.Sprintf(" LIMIT $%d OFFSET $%d\n", nextArg, nextArg+1))
+	args = append(args, queryLimit, offset)
+
+	return builder.String(), args
+}
+
+func normalizeHistoryStatusFilter(value string) []string {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "", "all":
+		return nil
+	case "success":
+		return []string{"succeeded"}
+	case "blocked":
+		return []string{"blocked"}
+	case "error":
+		return []string{"failed", "timed_out", "canceled"}
+	default:
+		return []string{strings.ToLower(strings.TrimSpace(value))}
+	}
 }

@@ -134,6 +134,7 @@ func registerAdminRoutes(mux *http.ServeMux, deps RouterDeps) {
 
 func registerCollectionRoutes(mux *http.ServeMux, deps RouterDeps) {
 	var service *collections.Service
+	var requestsService *requests.Service
 	authService := deps.Auth
 	if authService == nil && deps.Store != nil && deps.Store.Auth != nil {
 		authService = auth.NewService(deps.Store.Auth)
@@ -141,8 +142,11 @@ func registerCollectionRoutes(mux *http.ServeMux, deps RouterDeps) {
 	if deps.Store != nil && deps.Store.Collections != nil {
 		service = collections.NewService(deps.Store.Collections)
 	}
+	if deps.Store != nil && deps.Store.SavedRequests != nil {
+		requestsService = requests.NewService(deps.Store.SavedRequests)
+	}
 
-	NewCollectionsHandler(service, authService).Register(mux)
+	NewCollectionsHandler(service, requestsService, authService).Register(mux)
 }
 
 func registerSavedRequestRoutes(mux *http.ServeMux, deps RouterDeps) {

@@ -22,6 +22,7 @@ type SavedRequest struct {
 	Description     string          `json:"description,omitempty"`
 	Method          string          `json:"method"`
 	URL             string          `json:"url"`
+	SortOrder       int             `json:"sortOrder"`
 	QueryParams     json.RawMessage `json:"queryParams,omitempty"`
 	Headers         json.RawMessage `json:"headers,omitempty"`
 	AuthScheme      string          `json:"authScheme"`
@@ -72,6 +73,7 @@ type UpdateParams struct {
 
 type Repository interface {
 	GetByID(ctx context.Context, id string, ownerUserID string) (SavedRequest, error)
+	ListByCollection(ctx context.Context, collectionID string, ownerUserID string) ([]SavedRequest, error)
 	Create(ctx context.Context, params CreateParams) (SavedRequest, error)
 	Update(ctx context.Context, params UpdateParams) (SavedRequest, error)
 	Delete(ctx context.Context, id string, ownerUserID string) error
@@ -93,6 +95,20 @@ func (s *Service) Get(ctx context.Context, id string, ownerUserID string) (Saved
 		return SavedRequest{}, ErrInvalid
 	}
 	return s.repo.GetByID(ctx, strings.TrimSpace(id), strings.TrimSpace(ownerUserID))
+}
+
+func (s *Service) ListByCollection(ctx context.Context, collectionID string, ownerUserID string) ([]SavedRequest, error) {
+	if s == nil || s.repo == nil {
+		return nil, ErrUnavailable
+	}
+
+	collectionID = strings.TrimSpace(collectionID)
+	ownerUserID = strings.TrimSpace(ownerUserID)
+	if collectionID == "" || ownerUserID == "" {
+		return nil, ErrInvalid
+	}
+
+	return s.repo.ListByCollection(ctx, collectionID, ownerUserID)
 }
 
 func (s *Service) Create(ctx context.Context, params CreateParams) (SavedRequest, error) {
