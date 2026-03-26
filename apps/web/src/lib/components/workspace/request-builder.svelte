@@ -36,6 +36,7 @@
 		mode?: RequestBuilderMode;
 		request?: RequestBuilderDraft;
 		sendLabel?: string;
+		pending?: boolean;
 		lockedNote?: string;
 		onSend?: (draft: RequestBuilderDraft) => void;
 		onOpenSignIn?: () => void;
@@ -48,6 +49,7 @@
 		mode = "guest",
 		request,
 		sendLabel = "Send request",
+		pending = false,
 		lockedNote = "Guests can inspect the builder, but custom targets remain locked until sign-in.",
 		onSend,
 		onOpenSignIn,
@@ -202,11 +204,11 @@
 				variant="default"
 				size="lg"
 				class="pill-button shadow-sm"
-				disabled={Boolean(validation)}
+				disabled={Boolean(validation) || pending}
 				onclick={handleSend}
 			>
 				<PlayIcon class="size-4" />
-				{sendLabel}
+				{pending ? "Sending..." : sendLabel}
 			</Button>
 		</div>
 
