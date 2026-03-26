@@ -63,6 +63,34 @@ jobs:
       - name: Run web unit tests
         run: bun run test:web:unit
 
+  browser:
+    name: Browser checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: web
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.19
+
+      - name: Install web dependencies
+        run: bun install --cwd ./apps/web --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
+
+      - name: Run browser checks
+        run: bun run test:web:browser
+
   server:
     name: Server checks
     runs-on: ubuntu-latest

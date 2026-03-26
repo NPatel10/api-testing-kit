@@ -19,6 +19,7 @@
     "test:web:unit": "bun run --cwd ./apps/web test:unit -- --run",
     "test:web:smoke": "bun run --cwd ./apps/web test:smoke",
     "test:web:e2e": "bun run --cwd ./apps/web test:e2e",
+    "test:web:browser": "bun run --cwd ./apps/web test:browser",
     "dev:server": "go -C ./server run ./cmd/api",
     "lint:server": "go -C ./server vet ./...",
     "typecheck:server": "go -C ./server test -run '^$' ./...",
