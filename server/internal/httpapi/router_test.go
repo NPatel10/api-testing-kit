@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -109,5 +110,22 @@ func TestTemplatesDetailNotFound(t *testing.T) {
 
 	if payload.Error.Code != "template_not_found" {
 		t.Fatalf("expected error code %q, got %q", "template_not_found", payload.Error.Code)
+	}
+}
+
+func TestGuestRunsRouteIsRegistered(t *testing.T) {
+	t.Parallel()
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/guest-runs", strings.NewReader("{"))
+	rr := httptest.NewRecorder()
+
+	NewRouter(RouterDeps{}).ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusBadRequest {
+		t.Fatalf("expected status %d, got %d", http.StatusBadRequest, rr.Code)
+	}
+
+	if !strings.Contains(rr.Body.String(), "invalid_request") {
+		t.Fatalf("expected guest run error payload, got %s", rr.Body.String())
 	}
 }

@@ -40,12 +40,20 @@ func TestAuthSignupLoginMeAndLogout(t *testing.T) {
 		User struct {
 			Email string `json:"email"`
 		} `json:"user"`
+		Entitlements struct {
+			Plan struct {
+				Code string `json:"code"`
+			} `json:"plan"`
+		} `json:"entitlements"`
 	}
 	if err := json.Unmarshal(signupRR.Body.Bytes(), &signupPayload); err != nil {
 		t.Fatalf("failed to decode signup payload: %v", err)
 	}
 	if signupPayload.User.Email != "user@example.com" {
 		t.Fatalf("expected normalized email, got %q", signupPayload.User.Email)
+	}
+	if signupPayload.Entitlements.Plan.Code != "starter" {
+		t.Fatalf("expected starter plan in signup response, got %q", signupPayload.Entitlements.Plan.Code)
 	}
 
 	meReq := httptest.NewRequest(http.MethodGet, "/api/v1/me", nil)
@@ -54,6 +62,30 @@ func TestAuthSignupLoginMeAndLogout(t *testing.T) {
 	mux.ServeHTTP(meRR, meReq)
 	if meRR.Code != http.StatusOK {
 		t.Fatalf("expected me status %d, got %d", http.StatusOK, meRR.Code)
+	}
+
+	var mePayload struct {
+		Entitlements struct {
+			Plan struct {
+				Code string `json:"code"`
+			} `json:"plan"`
+			Capabilities []struct {
+				Key     string `json:"key"`
+				Enabled bool   `json:"enabled"`
+			} `json:"capabilities"`
+		} `json:"entitlements"`
+	}
+	if err := json.Unmarshal(meRR.Body.Bytes(), &mePayload); err != nil {
+		t.Fatalf("failed to decode me payload: %v", err)
+	}
+	if mePayload.Entitlements.Plan.Code != "starter" {
+		t.Fatalf("expected starter plan in me response, got %q", mePayload.Entitlements.Plan.Code)
+	}
+	if len(mePayload.Entitlements.Capabilities) != 4 {
+		t.Fatalf("expected four capabilities, got %d", len(mePayload.Entitlements.Capabilities))
+	}
+	if !mePayload.Entitlements.Capabilities[0].Enabled {
+		t.Fatalf("expected custom URL execution to be enabled for authenticated users")
 	}
 
 	loginReq := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", strings.NewReader(`{"email":"user@example.com","password":"password123"}`))

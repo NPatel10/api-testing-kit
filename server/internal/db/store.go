@@ -7,6 +7,7 @@ import (
 
 	"api-testing-kit/server/internal/auth"
 	"api-testing-kit/server/internal/collections"
+	"api-testing-kit/server/internal/entitlements"
 	"api-testing-kit/server/internal/history"
 	"api-testing-kit/server/internal/requests"
 
@@ -14,15 +15,22 @@ import (
 )
 
 type Store struct {
-	pool           *pgxpool.Pool
-	Auth           auth.Repository
-	Collections    collections.Repository
-	SavedRequests  requests.Repository
-	History        history.Repository
-	Templates      *TemplateRepository
-	Usage          *UsageRepository
-	Abuse          *AbuseRepository
-	BlockedTargets *BlockedTargetRepository
+	pool               *pgxpool.Pool
+	Auth               auth.Repository
+	Collections        collections.Repository
+	SavedRequests      requests.Repository
+	History            history.Repository
+	Plans              *PlanRepository
+	PlanEntitlements   *PlanEntitlementRepository
+	Entitlements       entitlements.Repository
+	BillingCustomers   *BillingCustomerRepository
+	Subscriptions      *SubscriptionRepository
+	SubscriptionEvents *SubscriptionEventRepository
+	Invoices           *InvoiceRepository
+	Templates          *TemplateRepository
+	Usage              *UsageRepository
+	Abuse              *AbuseRepository
+	BlockedTargets     *BlockedTargetRepository
 }
 
 func Open(ctx context.Context, databaseURL string, maxConns int32) (*Store, error) {
@@ -60,16 +68,26 @@ func NewStore(pool *pgxpool.Pool) *Store {
 		return nil
 	}
 
+	plans := NewPlanRepository(pool)
+	planEntitlements := NewPlanEntitlementRepository(pool)
+
 	return &Store{
-		pool:           pool,
-		Auth:           NewAuthRepository(pool),
-		Collections:    NewCollectionRepository(pool),
-		SavedRequests:  NewSavedRequestRepository(pool),
-		History:        NewRequestHistoryRepository(pool),
-		Templates:      NewTemplateRepository(pool),
-		Usage:          NewUsageRepository(pool),
-		Abuse:          NewAbuseRepository(pool),
-		BlockedTargets: NewBlockedTargetRepository(pool),
+		pool:               pool,
+		Auth:               NewAuthRepository(pool),
+		Collections:        NewCollectionRepository(pool),
+		SavedRequests:      NewSavedRequestRepository(pool),
+		History:            NewRequestHistoryRepository(pool),
+		Plans:              plans,
+		PlanEntitlements:   planEntitlements,
+		Entitlements:       NewEntitlementRepository(plans, planEntitlements),
+		BillingCustomers:   NewBillingCustomerRepository(pool),
+		Subscriptions:      NewSubscriptionRepository(pool),
+		SubscriptionEvents: NewSubscriptionEventRepository(pool),
+		Invoices:           NewInvoiceRepository(pool),
+		Templates:          NewTemplateRepository(pool),
+		Usage:              NewUsageRepository(pool),
+		Abuse:              NewAbuseRepository(pool),
+		BlockedTargets:     NewBlockedTargetRepository(pool),
 	}
 }
 
