@@ -15,6 +15,13 @@ All tasks below are aligned with `plan.md`, `ui-pages.md`, and `design-guideline
 
 ---
 
+## Verification Notes
+
+- Verification on `2026-03-26` found follow-up gaps after the initial completion pass.
+- A task marked `completed` can still have a later verification follow-up if the underlying feature exists but is not yet wired end-to-end or fully covered by tests/CI.
+
+---
+
 ## Work Rules
 
 - Do not start feature work before the shared scaffold exists.
@@ -187,7 +194,7 @@ Parallel With:
 
 ### UX2. Request Builder UI
 Owner: `Agent Group B`
-Status: `completed` on `2026-03-25`
+Status: `completed` on `2026-03-25`; live runner wiring follow-up opened on `2026-03-26`
 
 Scope:
 - Implement method selector, URL bar, params, headers, auth, body, and send action.
@@ -205,7 +212,7 @@ Unblocks:
 
 ### UX3. Response Viewer UI
 Owner: `Agent Group B`
-Status: `completed` on `2026-03-25`
+Status: `completed` on `2026-03-25`; live response hydration follow-up opened on `2026-03-26`
 
 Scope:
 - Implement pretty/raw/headers tabs.
@@ -239,6 +246,49 @@ Scope:
 Depends on:
 - UX1
 - backend template endpoints
+
+### UX6. Live `/app` Request Execution Wiring
+Owner: `Agent Group B`
+Status: `completed` on `2026-03-26`
+
+Scope:
+- Replace default mock request/response previews in `/app` with live execution flows where backend contracts already exist.
+- Wire guest sends to `/api/v1/guest-runs`.
+- Wire authenticated sends to `/api/v1/runs`.
+- Hydrate the response viewer from actual execution results, not only seeded examples.
+- Keep preview/mock state only as an explicit fallback or demo mode, not the default authenticated workspace path.
+
+Depends on:
+- UX2
+- UX3
+- C2
+- C5
+- D1
+- D3
+
+Unblocks:
+- end-to-end `/app` verification
+- real guest/authenticated request execution checks
+
+### UX7. Live History And Collection Surfaces
+Owner: `Agent Group B`
+Status: `completed` on `2026-03-26`
+
+Scope:
+- Replace mock-backed `/app/history` and `/app/collections/[id]` loaders with live backend data.
+- Load authenticated collections, saved requests, and history from API responses.
+- Preserve guest locked/preview states without implying persistence that does not exist.
+- Keep route-level UX aligned with the shared `/app` contract while using real persistence for signed-in sessions.
+
+Depends on:
+- C3
+- C4
+- C7
+- C8
+
+Unblocks:
+- persisted workspace verification
+- authenticated reuse and rerun flows
 
 ---
 
@@ -275,7 +325,7 @@ Depends on:
 
 ### C3. Collections API
 Owner: `Agent Group C`
-Status: `completed` on `2026-03-25`; collection detail surface follow-up completed on `2026-03-26`
+Status: `completed` on `2026-03-25`; collection detail surface follow-up completed on `2026-03-26`; live `/app` consumer follow-up completed on `2026-03-26`
 
 Scope:
 - CRUD for collections.
@@ -288,7 +338,7 @@ Depends on:
 
 ### C4. Saved Requests And History API
 Owner: `Agent Group C`
-Status: `completed` on `2026-03-25`; authenticated history surface follow-up completed on `2026-03-26`
+Status: `completed` on `2026-03-25`; authenticated history surface follow-up completed on `2026-03-26`; live `/app` consumer follow-up completed on `2026-03-26`
 
 Scope:
 - CRUD for saved requests.
@@ -321,6 +371,44 @@ Scope:
 Depends on:
 - BL2
 - C1
+
+### C7. Collection Detail Query Surface
+Owner: `Agent Group C`
+Status: `completed` on `2026-03-26`
+
+Scope:
+- Add a backend query surface for `/app/collections/[id]`.
+- Return collection metadata plus the saved requests that belong to the collection in stable display order.
+- Preserve ownership checks and any read-only sharing rules already defined by the data model.
+- Avoid forcing the frontend to reconstruct collection detail from seeded mocks.
+
+Depends on:
+- C3
+- C4
+- C2
+
+Unblocks:
+- UX7
+- authenticated collection detail routing
+
+### C8. History Filters And Re-run Query Surface
+Owner: `Agent Group C`
+Status: `completed` on `2026-03-26`
+
+Scope:
+- Extend history APIs with filters for status, domain, method, and date.
+- Return enough request snapshot detail to support rerun and save-to-collection flows from history.
+- Make pagination and limit behavior explicit for authenticated history views.
+- Keep access checks and ownership boundaries unchanged while broadening the query contract.
+
+Depends on:
+- C4
+- C2
+- D1
+
+Unblocks:
+- UX7
+- history filters and reuse flows
 
 ---
 
@@ -366,7 +454,7 @@ Depends on:
 
 ### D4. Rate Limiting Engine
 Owner: `Agent Group D`
-Status: `completed` on `2026-03-25`
+Status: `completed` on `2026-03-25` for limiter primitives and guest wiring; authenticated runner follow-up completed on `2026-03-26`
 
 Scope:
 - Implement IP and user quota enforcement.
@@ -389,6 +477,26 @@ Scope:
 Depends on:
 - D1
 - C6
+
+### D6. Authenticated Runner Limit Enforcement
+Owner: `Agent Group D`
+Status: `completed` on `2026-03-26`
+
+Scope:
+- Apply IP, user, and domain limiter checks to authenticated `/api/v1/runs`.
+- Enforce authenticated size, timeout, concurrency, and redirect limits through the live runner path, not only guest mode or UI copy.
+- Record quota denials, cooldown hits, and suspicious spikes in usage/abuse storage for admin review.
+- Keep the limiter behavior consistent with the rate-limit rules documented in `ui-pages.md`.
+
+Depends on:
+- D1
+- D4
+- C6
+- C2
+
+Unblocks:
+- end-to-end authenticated runner verification
+- accurate abuse and quota monitoring
 
 ---
 
@@ -542,7 +650,7 @@ Depends on:
 
 ### G3. Test Harness
 Owner: `Agent Group G`
-Status: `completed` on `2026-03-25`
+Status: `completed` on `2026-03-25`; browser verification follow-up completed on `2026-03-26`
 
 Scope:
 - Add unit and integration test setup.
@@ -555,7 +663,7 @@ Depends on:
 
 ### G4. CI Checks
 Owner: `Agent Group G`
-Status: `completed` on `2026-03-26`
+Status: `completed` on `2026-03-26`; browser coverage follow-up completed on `2026-03-26`
 
 Scope:
 - Add lint, typecheck, test, and build checks.
@@ -563,6 +671,25 @@ Scope:
 
 Depends on:
 - G3
+
+### G5. Browser Verification And CI Coverage
+Owner: `Agent Group G`
+Status: `completed` on `2026-03-26`
+
+Scope:
+- Repair stale Playwright smoke and e2e assertions so browser suites pass again.
+- Make the docs, `/app`, and related public routes under test align with the current UI copy and structure.
+- Run the agreed browser checks in CI, or explicitly split them into required and visible non-blocking jobs if runtime is a concern.
+- Keep the verification layer strong enough to catch drift between docs, route content, and shipped UI.
+
+Depends on:
+- G3
+- G4
+- F4
+
+Unblocks:
+- trustworthy browser regression coverage
+- CI parity with local verification
 
 ---
 
@@ -604,10 +731,11 @@ After those are in place, the rest can proceed in parallel with careful file own
 ## Definition Of Done
 
 The implementation phase is done when:
-- `/app` works in guest and authenticated modes
+- `/app` works in guest and authenticated modes with live backend-backed execution, not only seeded previews
 - requests can be sent safely from the backend
-- collections and history are persisted
-- abuse protection and rate limits are active
+- collections and history are persisted and surfaced from live APIs
+- abuse protection and rate limits are active on both guest and authenticated runner paths
 - the UI matches the approved design system
 - the app can be built and deployed locally with Docker
+- browser smoke/e2e checks are green for the agreed suite, and CI runs the required verification set
 - the task list supports multiple subagents without overlapping ownership

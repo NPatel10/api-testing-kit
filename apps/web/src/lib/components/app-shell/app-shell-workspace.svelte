@@ -89,22 +89,22 @@
 	const liveResponseState = $derived(liveResponse ?? previewResponse ?? emptyResponse);
 	const liveResponseDescription = $derived(
 		liveResponse
-			? "Latest live response returned from the backend proxy."
+			? "Latest backend response."
 			: savedRequest
-				? "The builder is hydrated from a persisted saved request."
+				? "Persisted request state."
 			: previewResponse
-				? "Preview mode shows the seeded response snapshot for the selected template."
-				: "Live results appear here once you send a request through the backend proxy.",
+				? "Seeded preview response."
+				: "No response yet.",
 	);
 	const liveEmptyTitle = $derived(
 		isSending ? "Sending request..." : previewMode ? "Preview response pending" : "No request sent yet",
 	);
 	const liveEmptyDescription = $derived(
 		isSending
-			? "The last completed response stays visible while the current run resolves."
+			? "Waiting for the current run to finish."
 			: previewMode
-				? "Preview mode renders the seeded response snapshot for the selected template."
-				: "Send a request to populate the viewer with a live backend response.",
+				? "Preview response is available for the current selection."
+				: "Send a request to populate the viewer.",
 	);
 
 	$effect(() => {
@@ -361,7 +361,7 @@
 
 	<div class="grid gap-4 xl:grid-cols-[1.16fr_0.84fr]">
 		<TemplateBrowser
-			title={mode === "authenticated" ? "Templates, collections, and unlocked workspace state" : "Guest-safe templates and collections"}
+			title="Templates and collections"
 			subtitle={workspaceState.subtitle}
 			templates={templateBrowserTemplates}
 			collections={templateBrowserCollections}
@@ -372,11 +372,11 @@
 				<CardHeader class="gap-3">
 					<div class="flex items-center justify-between gap-3">
 						<div>
-							<CardTitle>Session prompts</CardTitle>
+							<CardTitle>Session state</CardTitle>
 							<CardDescription>
 								{mode === "authenticated"
-									? "Shared copy for the authenticated workspace and upgrade hints."
-									: "Shared copy for the guest lock and sign-in surfaces."}
+									? "Signed-in access and quota state."
+									: "Guest access and lock-state labels."}
 							</CardDescription>
 						</div>
 						<Badge variant={mode === "authenticated" ? "default" : "secondary"}>{workspaceState.mode}</Badge>
@@ -394,7 +394,6 @@
 									{prompt.action.label}
 								</Badge>
 							</div>
-							<p class="mt-2 text-sm leading-6 text-text-body">{prompt.body}</p>
 						</div>
 					{/each}
 				</CardContent>
@@ -405,8 +404,8 @@
 					<CardTitle>{mode === "authenticated" ? "Recent authenticated runs" : "Recent guest runs"}</CardTitle>
 					<CardDescription>
 						{mode === "authenticated"
-							? "Persistence is part of the signed-in contract, so the history rail can grow with the same shell."
-							: "Demo history stays visible, while persistence remains locked."}
+							? "Recent persisted runs."
+							: "Recent preview runs."}
 					</CardDescription>
 				</CardHeader>
 				<CardContent class="space-y-3">
@@ -442,8 +441,8 @@
 					<CardTitle>Quota snapshot</CardTitle>
 					<CardDescription>
 						{mode === "authenticated"
-							? "Authenticated limits are surfaced directly in the shell."
-							: "The guest limits from the docs are surfaced directly in the shell."}
+							? "Current signed-in limits."
+							: "Current guest limits."}
 					</CardDescription>
 				</CardHeader>
 				<CardContent class="space-y-3">
@@ -474,12 +473,12 @@
 		<div class="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
 			<Card class="panel-card">
 				<CardHeader class="gap-3">
-					<CardTitle>Authenticated contract</CardTitle>
-					<CardDescription>The same shell now allows custom targets, saved history, and account-level controls.</CardDescription>
+					<CardTitle>Access</CardTitle>
+					<CardDescription>Signed-in capabilities on the shared route.</CardDescription>
 				</CardHeader>
 				<CardContent class="space-y-2 text-sm leading-6 text-text-body">
-					<p>Custom URLs are editable, saved requests persist, and the runner keeps validating outbound requests.</p>
-					<p>Guest lock surfaces are intentionally hidden because the capability is already unlocked.</p>
+					<p>Custom URLs, saved requests, and history are enabled.</p>
+					<p>Outbound validation remains active.</p>
 				</CardContent>
 			</Card>
 			<Card class="panel-card">
@@ -495,11 +494,11 @@
 			</Card>
 			<Card class="panel-card">
 				<CardHeader class="gap-3">
-					<CardTitle>Upgrade placeholder</CardTitle>
+					<CardTitle>Quota model</CardTitle>
 					<CardDescription>{workspaceState.lockedActions[0]?.description ?? "Higher-tier entitlements can layer on later."}</CardDescription>
 				</CardHeader>
 				<CardContent class="text-sm leading-6 text-text-body">
-					<p>The authenticated contract leaves room for plan-based limits without changing the shared `/app` surface.</p>
+					<p>The shared workspace can carry broader plan limits later.</p>
 				</CardContent>
 			</Card>
 		</div>
@@ -512,8 +511,8 @@
 					<CardTitle>Workspace pulse</CardTitle>
 					<CardDescription>
 						{mode === "authenticated"
-							? "Shared metrics from the authenticated state model keep the shell grounded in the product rules."
-							: "Shared metrics from the guest state model keep the shell grounded in the product rules."}
+							? "Signed-in workspace metrics."
+							: "Guest workspace metrics."}
 					</CardDescription>
 				</div>
 				<Badge variant="outline">{workspaceState.mode} mode</Badge>

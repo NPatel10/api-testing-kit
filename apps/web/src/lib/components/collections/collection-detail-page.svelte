@@ -117,9 +117,9 @@
 		<Card class="panel-card">
 			<CardHeader class="gap-3">
 				<div class="flex items-center justify-between gap-3">
-					<div>
-						<CardTitle>Signed-in capabilities</CardTitle>
-						<CardDescription>{getEntitlementSummary(entitlements, mode)}</CardDescription>
+						<div>
+							<CardTitle>Signed-in capabilities</CardTitle>
+							<CardDescription>{getEntitlementSummary(entitlements, mode)}</CardDescription>
 					</div>
 					<Badge variant="outline">{entitlements.plan.name}</Badge>
 				</div>
@@ -163,9 +163,9 @@
 								<CardTitle>Request groups</CardTitle>
 								<CardDescription>
 									{#if shouldLock}
-										Guest mode keeps the collection shape visible, but execution and persistence remain locked.
+										Guest mode keeps execution and persistence locked.
 									{:else}
-										Authenticated users get live saved requests with reusable launch paths back into `/app`.
+										Signed-in mode loads saved requests and launch paths.
 									{/if}
 								</CardDescription>
 							</div>
@@ -208,7 +208,7 @@
 															Gated in guest mode
 														</div>
 														<p class="mt-2 text-xs leading-5 text-text-muted">
-															Open actions move through the workspace shell, but persisted collection execution is reserved for signed-in users.
+															Persisted collection execution unlocks after sign-in.
 														</p>
 													</div>
 												{:else}
@@ -272,8 +272,8 @@
 								<CardTitle>Collection metadata</CardTitle>
 								<CardDescription>
 									{detail.source === "live"
-										? "Live collection facts returned by the authenticated API."
-										: "Route-level collection facts for the current preview state."}
+										? "Authenticated collection metadata."
+										: "Preview collection metadata."}
 								</CardDescription>
 							</div>
 							<Badge variant="outline">{detail.scope}</Badge>
@@ -297,8 +297,8 @@
 						<CardTitle>Related collections</CardTitle>
 						<CardDescription>
 							{detail.source === "live"
-								? "Other persisted collections visible to this signed-in account."
-								: "Nearby collections visible in the current preview mode."}
+								? "Other persisted collections."
+								: "Other preview collections."}
 						</CardDescription>
 					</CardHeader>
 					<CardContent class="space-y-3">
@@ -336,13 +336,13 @@
 							{:else}
 								<ShieldCheckIcon class="size-4 text-success" />
 							{/if}
-							<CardTitle>{shouldLock ? "Guest fallback" : "Execution ready"}</CardTitle>
+							<CardTitle>{shouldLock ? "Access" : "Execution"}</CardTitle>
 						</div>
 						<CardDescription>
 							{#if shouldLock}
-								The collection detail page stays honest: visitors can inspect the shape, but authenticated execution is still required.
+								Guest mode keeps execution locked.
 							{:else}
-								The collection is open in the signed-in shell and can be launched from the same workspace model.
+								The collection is ready to launch from the signed-in workspace.
 							{/if}
 						</CardDescription>
 					</CardHeader>

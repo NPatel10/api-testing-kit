@@ -30,21 +30,21 @@
 					href="/app"
 					class="rounded-full bg-primary-green px-6 py-3 font-medium text-white shadow-[0_12px_28px_rgba(31,122,77,0.28)] transition hover:bg-primary-green-hover"
 				>
-					Open the app
+					Open app
 				</a>
 				<a
 					href="#examples"
 					class="rounded-full border border-border/80 bg-white px-6 py-3 font-medium text-text-strong transition hover:bg-surface-soft"
 				>
-					See example flows
+					View scenarios
 				</a>
 			</div>
 
 			<MarketingSectionHeading
 				class="pt-2"
-				eyebrow="Why it works"
-				title="The marketing page and app share the same visual language"
-				description="Warm shells, rounded cards, and restrained green accents make the public surface feel like the workspace rather than a separate brochure site."
+				eyebrow="Visual system"
+				title="The public site and workspace use one design language"
+				description="The product keeps the same shell, card system, and action styling across public and signed-in routes."
 			/>
 		</div>
 

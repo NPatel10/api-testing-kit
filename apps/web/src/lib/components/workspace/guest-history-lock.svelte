@@ -1,11 +1,11 @@
 <script lang="ts">
 	import GuestLockSurface from "./guest-lock-surface.svelte";
 
-	const bullets = [
-		"History remains visible in the shell for guest orientation.",
-		"Runs are ephemeral until an account is attached.",
-		"Re-run and persist controls stay clearly disabled.",
-	];
+const bullets = [
+	"History remains visible.",
+	"Runs are ephemeral in guest mode.",
+	"Replay and persistence stay locked.",
+];
 
 	const highlights = [
 		{ label: "Guest retention", value: "Ephemeral" },
@@ -16,15 +16,15 @@
 
 <GuestLockSurface
 	eyebrow="Request history"
-	title="History persistence is locked until authentication"
-	description="Visitors can see where recent runs will appear, but nothing is written to long-term storage until the session is tied to an account."
+	title="History persistence is locked"
+	description="Guest mode does not store durable runs."
 	badge="History rail"
-	summary="This keeps the workspace honest: guests still understand the request timeline, while authenticated users get durable history and replay support."
+	summary="Stored history unlocks after sign-in."
 	{bullets}
 	{highlights}
 	primaryActionLabel="Sign in to view history"
 	primaryActionHref="/app"
-	secondaryActionLabel="See workspace layout"
+	secondaryActionLabel="Docs"
 	secondaryActionHref="/docs"
 	tone="slate"
 />

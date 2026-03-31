@@ -58,13 +58,13 @@
 				<div class="space-y-3">
 					<h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">
 						{data.mode === "authenticated"
-							? "Review saved runs, blocked attempts, and the requests worth keeping"
-							: "See the history surface, but keep persistence behind sign-in"}
+							? "Request history"
+							: "Request history preview"}
 					</h1>
 					<p class="max-w-2xl text-sm leading-7 text-text-body sm:text-base">
 						{data.mode === "authenticated"
-							? "This view is the durable record for authenticated requests: status, method, domain, timing, and response size stay visible so useful runs are easy to revisit."
-							: "Guests still get a truthful preview of the history rail, including blocked states and timing metadata, but the durable history and replay workflow remain locked."}
+							? "Persisted runs grouped by status, method, domain, timing, and response size."
+							: "Preview history with mode-aware persistence locks."}
 					</p>
 				</div>
 			</div>
@@ -76,7 +76,7 @@
 				</Button>
 				<Button href={resolve("/docs")} variant="outline" size="lg" class="rounded-full border-border bg-white px-6">
 					<SearchIcon class="size-4" />
-					Read quick start
+					Docs
 				</Button>
 			</div>
 		</div>
@@ -120,8 +120,8 @@
 							</CardTitle>
 							<CardDescription>
 								{data.mode === "authenticated"
-									? "Use the current filters to narrow the requests by outcome and method."
-									: "The timeline stays visible, but the save and replay actions are intentionally locked."}
+									? "Filtered persisted requests."
+									: "Filtered preview requests."}
 							</CardDescription>
 						</div>
 						<Button href="?status=all&method=all&domain=all" variant="ghost" class="rounded-full">
@@ -262,8 +262,8 @@
 							<p class="text-base font-semibold text-text-strong">No history matches this view</p>
 							<p class="mt-2 text-sm leading-6 text-text-body">
 								{data.mode === "authenticated"
-									? "Reset the filters or run a request in `/app` to repopulate the persisted timeline."
-									: "Reset the filters to see the default preview set, or return to `/app` to run a new request."}
+									? "No persisted requests match the current filters."
+									: "No preview requests match the current filters."}
 							</p>
 						</div>
 					{/if}
@@ -279,7 +279,7 @@
 							</div>
 							<div>
 								<CardTitle class="text-lg">History persistence stays locked for guests</CardTitle>
-								<CardDescription>Guests can inspect the shape, but not persist or replay saved runs.</CardDescription>
+								<CardDescription>Guest mode does not store or replay runs.</CardDescription>
 							</div>
 						</div>
 					</CardHeader>
@@ -288,7 +288,7 @@
 							Open `/app`
 						</Button>
 						<Button href={resolve("/docs")} variant="outline" class="rounded-full border-border bg-white px-5">
-							Read the guest rules
+							Docs
 						</Button>
 					</CardContent>
 				</Card>
@@ -296,25 +296,25 @@
 		</main>
 
 		<aside class="space-y-4 lg:sticky lg:top-6 lg:self-start">
-			<Card class="border border-[#e7e3d8] bg-white/90 shadow-[0_12px_30px_rgba(21,31,23,0.05)]">
-				<CardHeader class="gap-2">
-					<CardTitle class="text-base">Timeline notes</CardTitle>
-					<CardDescription>What the current view is telling you.</CardDescription>
-				</CardHeader>
-				<CardContent class="space-y-3 text-sm leading-6 text-text-body">
-					<p>The page is intentionally shaped around the same metadata that the backend history API already exposes: method, target, response state, duration, and payload size.</p>
-					<p>{data.mode === "authenticated" ? "Authenticated users now see live persisted runs on the same route structure the preview mode established." : "Guests get a faithful preview so the surface still feels real, even though durable storage is disabled."}</p>
-				</CardContent>
-			</Card>
+				<Card class="border border-[#e7e3d8] bg-white/90 shadow-[0_12px_30px_rgba(21,31,23,0.05)]">
+					<CardHeader class="gap-2">
+						<CardTitle class="text-base">View state</CardTitle>
+						<CardDescription>Current route context.</CardDescription>
+					</CardHeader>
+					<CardContent class="space-y-3 text-sm leading-6 text-text-body">
+						<p>History surfaces method, target, response state, duration, and payload size.</p>
+						<p>{data.mode === "authenticated" ? "Signed-in sessions load persisted runs on this route." : "Guest mode keeps the route visible while persistence stays locked."}</p>
+					</CardContent>
+				</Card>
 
-			<Card class="border border-[#e7e3d8] bg-white/90 shadow-[0_12px_30px_rgba(21,31,23,0.05)]">
-				<CardHeader class="gap-2">
-					<CardTitle class="text-base">Default rules</CardTitle>
-					<CardDescription>These are the filters and states surfaced by default.</CardDescription>
-				</CardHeader>
-				<CardContent class="space-y-2">
-					<div class="rounded-[18px] border border-border/70 bg-[#fdfcf8] px-4 py-3 text-sm text-text-body">
-						Always show status first
+				<Card class="border border-[#e7e3d8] bg-white/90 shadow-[0_12px_30px_rgba(21,31,23,0.05)]">
+					<CardHeader class="gap-2">
+						<CardTitle class="text-base">Defaults</CardTitle>
+						<CardDescription>Baseline timeline fields.</CardDescription>
+					</CardHeader>
+					<CardContent class="space-y-2">
+						<div class="rounded-[18px] border border-border/70 bg-[#fdfcf8] px-4 py-3 text-sm text-text-body">
+							Always show status first
 					</div>
 					<div class="rounded-[18px] border border-border/70 bg-[#fdfcf8] px-4 py-3 text-sm text-text-body">
 						Show method and domain next
@@ -322,11 +322,11 @@
 					<div class="rounded-[18px] border border-border/70 bg-[#fdfcf8] px-4 py-3 text-sm text-text-body">
 						Keep time and size visible
 					</div>
-					<div class="rounded-[18px] border border-border/70 bg-[#fdfcf8] px-4 py-3 text-sm text-text-body">
-						Guests see the lock surface instead of a fake empty state
-					</div>
-				</CardContent>
-			</Card>
+						<div class="rounded-[18px] border border-border/70 bg-[#fdfcf8] px-4 py-3 text-sm text-text-body">
+							Guest mode keeps lock states visible
+						</div>
+					</CardContent>
+				</Card>
 		</aside>
 	</div>
 </section>

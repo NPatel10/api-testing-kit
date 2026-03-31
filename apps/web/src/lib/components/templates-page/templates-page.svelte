@@ -112,7 +112,7 @@
 	<title>Templates - API Testing Kit</title>
 	<meta
 		name="description"
-		content="Browse safe API templates with filters, search, and live previews that launch directly into the shared /app workspace."
+		content="Reference page for API templates, filters, previews, and launch paths into the shared /app workspace."
 	/>
 </svelte:head>
 
@@ -133,7 +133,7 @@
 						</div>
 						<div>
 							<p class="text-sm font-semibold tracking-tight text-text-strong">API Testing Kit</p>
-							<p class="text-xs text-text-muted">Templates page with live backend data and safe launches</p>
+							<p class="text-xs text-text-muted">Templates and collections</p>
 						</div>
 					</div>
 
@@ -150,15 +150,15 @@
 					<div class="space-y-6">
 						<div class="inline-flex items-center gap-2 rounded-full border border-[#d9e7d8] bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-[#1f7a4d]">
 							<span class="h-2 w-2 rounded-full bg-[#1f7a4d]"></span>
-							Guided browsing
+							Templates
 						</div>
 
 						<div class="space-y-4">
 							<h1 class="max-w-3xl text-4xl font-semibold tracking-tight text-text-strong sm:text-5xl lg:text-6xl">
-								Safe API templates with category filters, search, and a real launch path
+								Templates with filters, previews, and launch paths
 							</h1>
 							<p class="max-w-2xl text-sm leading-7 text-text-body sm:text-base">
-								Browse curated examples by category, inspect the request and response preview, then jump straight into the shared `/app` workspace with the selected template.
+								Allowlisted request presets and collection entry points for the shared workspace.
 							</p>
 						</div>
 
@@ -185,11 +185,9 @@
 						<CardHeader class="gap-3">
 							<div class="flex items-center gap-2">
 								<SparklesIcon class="size-4 text-primary-green" />
-								<CardTitle class="text-base">Launch snapshot</CardTitle>
+								<CardTitle class="text-base">Selection</CardTitle>
 							</div>
-							<CardDescription>
-								Selected template preview, launch affordance, and a clear path back into `/app`.
-							</CardDescription>
+							<CardDescription>Current template state and launch actions.</CardDescription>
 						</CardHeader>
 						<CardContent class="space-y-4">
 							<div class="rounded-[18px] border border-border/70 bg-panel-soft p-4">
@@ -201,7 +199,7 @@
 									{selectedTemplate?.title ?? "No template selected"}
 								</p>
 								<p class="mt-2 text-sm leading-6 text-text-body">
-									{selectedTemplate?.summary ?? "Use the search bar or category tabs to pick a template."}
+									{selectedTemplate?.summary ?? "No template selected."}
 								</p>
 							</div>
 
@@ -244,7 +242,7 @@
 							<div>
 								<CardTitle class="text-2xl tracking-tight sm:text-3xl">Filter templates</CardTitle>
 								<CardDescription class="mt-2 max-w-2xl text-sm leading-6 text-text-body">
-									Search by target, summary, tag, or override. Narrow the surface with category tabs and quick shape filters.
+									Search by target, summary, tag, or override.
 								</CardDescription>
 							</div>
 							<div class="flex flex-wrap gap-2 text-xs text-text-muted">
@@ -307,9 +305,7 @@
 							<div class="flex items-center justify-between gap-3">
 								<div>
 									<CardTitle>Template cards</CardTitle>
-									<CardDescription>
-										Click a card to inspect the request and response preview in the detail panel.
-									</CardDescription>
+									<CardDescription>Filtered result set.</CardDescription>
 								</div>
 								<Badge variant="secondary">{visibleTemplates.length} match filters</Badge>
 							</div>
@@ -384,9 +380,6 @@
 							{:else}
 								<div class="rounded-[24px] border border-dashed border-border/70 bg-panel-soft p-8">
 									<p class="text-lg font-semibold tracking-tight text-text-strong">No templates match the current filters.</p>
-									<p class="mt-2 max-w-2xl text-sm leading-6 text-text-body">
-										Adjust the search, switch categories, or clear the quick filters to continue browsing.
-									</p>
 									<div class="mt-4">
 										<Button variant="outline" class="pill-button" onclick={resetFilters}>
 											Reset filters
@@ -402,7 +395,7 @@
 							<div class="flex items-center justify-between gap-3">
 								<div>
 									<CardTitle>Template preview</CardTitle>
-									<CardDescription>Request, response, and launch details for the current selection.</CardDescription>
+									<CardDescription>Request, response, and launch details.</CardDescription>
 								</div>
 								<Badge variant="secondary">{selectedTemplate?.source === "live" ? "Live backend" : "Fallback"}</Badge>
 							</div>
@@ -471,9 +464,6 @@
 							{:else}
 								<div class="rounded-[24px] border border-dashed border-border/70 bg-panel-soft p-6">
 									<p class="text-sm font-semibold text-text-strong">No selection available.</p>
-									<p class="mt-2 text-sm leading-6 text-text-body">
-										Reset the filters to reveal templates, then open one of the cards.
-									</p>
 									<Button variant="outline" class="mt-4 pill-button" onclick={resetFilters}>
 										Reset filters
 									</Button>
@@ -487,10 +477,10 @@
 					<div class="max-w-3xl">
 						<p class="section-title">Category collections</p>
 						<h2 class="mt-2 text-2xl font-semibold tracking-tight text-text-strong sm:text-3xl">
-							The same templates, regrouped as launchable collections
+							Collections built from the same template set
 						</h2>
 						<p class="mt-3 text-sm leading-6 text-text-body sm:text-base">
-							Each category cluster can feed users back into the main workspace with a known starting point and a consistent safe target.
+							Grouped entry points for the shared workspace.
 						</p>
 					</div>
 
@@ -552,12 +542,12 @@
 				<section class="rounded-[30px] border border-[#dfe8dd] bg-[linear-gradient(135deg,rgba(31,122,77,0.16),rgba(255,255,255,0.96))] p-6 shadow-[0_18px_40px_rgba(21,31,23,0.08)] sm:p-8">
 					<div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 						<div class="max-w-2xl">
-							<p class="section-title">Ready to explore</p>
+							<p class="section-title">Workspace</p>
 							<h2 class="mt-2 text-2xl font-semibold tracking-tight text-text-strong sm:text-3xl">
-								Open `/app` with a selected template and continue in the shared workspace
+								Open `/app` with the current selection
 							</h2>
 							<p class="mt-3 text-sm leading-6 text-text-body sm:text-base">
-								The templates page is a stepping stone, not a dead end. Each launch path lands in the real app shell where guest constraints and authenticated execution diverge.
+								Templates and collections launch into the same workspace route.
 							</p>
 						</div>
 

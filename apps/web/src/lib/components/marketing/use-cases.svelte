@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ArrowRight, FileCode2, PanelTop, Users } from '@lucide/svelte';
+	import { FileCode2, PanelTop, Users } from '@lucide/svelte';
 	import MarketingSectionHeading from '$lib/components/marketing/marketing-section-heading.svelte';
 
 	let {
@@ -8,7 +8,6 @@
 		useCases: {
 			title: string;
 			text: string;
-			steps: string[];
 		}[];
 	} = $props();
 
@@ -17,9 +16,9 @@
 
 <div class="space-y-6">
 	<MarketingSectionHeading
-		eyebrow="Examples"
-		title="Use cases that show the product, not just the copy"
-		description="The page uses a few concrete workflows so visitors can see how the shell behaves across exploration, debugging, and team onboarding."
+		eyebrow="Scenarios"
+		title="Where the workspace fits"
+		description="The same shell supports demos, debugging, and repeatable team workflows."
 	/>
 
 	<div class="grid gap-4 xl:grid-cols-3">
@@ -37,15 +36,6 @@
 
 				<h3 class="mt-5 text-base font-semibold tracking-tight text-text-strong">{useCase.title}</h3>
 				<p class="mt-2 text-sm leading-6 text-text-body">{useCase.text}</p>
-
-				<ul class="mt-4 space-y-2">
-					{#each useCase.steps as step}
-						<li class="flex items-start gap-2 text-sm leading-6 text-text-body">
-							<ArrowRight size={15} class="mt-1 shrink-0 text-primary-green" />
-							<span>{step}</span>
-						</li>
-					{/each}
-				</ul>
 			</article>
 		{/each}
 	</div>

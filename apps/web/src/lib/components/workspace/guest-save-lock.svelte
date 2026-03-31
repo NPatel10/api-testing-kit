@@ -1,11 +1,11 @@
 <script lang="ts">
 	import GuestLockSurface from "./guest-lock-surface.svelte";
 
-	const bullets = [
-		"Collection save and duplicate actions remain visible.",
-		"Permanent request storage unlocks after sign-in.",
-		"Guest sessions can review the save workflow without writing data.",
-	];
+const bullets = [
+	"Save actions remain visible.",
+	"Permanent storage unlocks after sign-in.",
+	"Guest mode does not write data.",
+];
 
 	const highlights = [
 		{ label: "Guest save", value: "Preview only" },
@@ -16,15 +16,15 @@
 
 <GuestLockSurface
 	eyebrow="Save requests"
-	title="Saving requests is intentionally locked for guests"
-	description="The workspace still shows the save affordance, but permanent storage is reserved for authenticated users so the product never feels like an open scratchpad."
+	title="Saving requests is locked"
+	description="Guest mode does not persist requests."
 	badge="Save control"
-	summary="Guests can understand the save flow and its placement in the shell, while the backend keeps storage and collection management behind login."
+	summary="Persistence and collection management unlock after sign-in."
 	{bullets}
 	{highlights}
 	primaryActionLabel="Sign in to save"
 	primaryActionHref="/app"
-	secondaryActionLabel="Open collections docs"
+	secondaryActionLabel="Docs"
 	secondaryActionHref="/docs"
 	tone="emerald"
 />

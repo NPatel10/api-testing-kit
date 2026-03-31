@@ -44,7 +44,7 @@
 
 	const utilityLinks = [
 		{ label: "Safety rules", href: "/case-study", icon: ShieldCheckIcon },
-		{ label: "Quick snippets", href: "/docs", icon: TerminalSquareIcon },
+		{ label: "Docs", href: "/docs", icon: TerminalSquareIcon },
 	];
 </script>
 
@@ -55,7 +55,7 @@
 		</div>
 		<div class="min-w-0">
 			<p class="text-sm font-semibold tracking-tight text-foreground">API Testing Kit</p>
-			<p class="text-xs text-muted-foreground">Guest and authenticated workspace</p>
+			<p class="text-xs text-muted-foreground">Shared workspace</p>
 		</div>
 	</div>
 
@@ -71,9 +71,9 @@
 			{#if entitlements}
 				{getEntitlementSummary(entitlements, mode)}
 			{:else if mode === "authenticated"}
-				Custom URLs, saved requests, and history are available in the same shell.
+				Custom URLs, saved requests, and history are enabled.
 			{:else}
-				Guests can explore the live shell. Custom URLs and saved data stay behind sign-in.
+				Guest mode stays allowlisted.
 			{/if}
 		</p>
 	</div>
@@ -139,8 +139,8 @@
 			</p>
 			<p class="mt-1 text-xs leading-5 text-muted-foreground">
 				{mode === "authenticated"
-					? "The shell now follows the authenticated contract, while still keeping the same visual structure."
-					: "The shell is real, but request execution stays constrained until authentication lands."}
+					? "Signed-in execution uses the same workspace route."
+					: "Guest execution stays constrained by route and target rules."}
 			</p>
 			<Button variant="outline" size="sm" class="mt-3 w-full">
 				{mode === "authenticated" ? "Account ready" : "Sign in to unlock"}

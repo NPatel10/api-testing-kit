@@ -44,21 +44,21 @@
 		}
 	];
 
-	const flowSteps = [
+	const runtimeCards = [
 		{
-			step: '01',
-			title: 'Select the request shape',
-			text: 'Pick a method, target, and body mode, then make the relevant headers and params visible in context.'
+			label: 'Request',
+			title: 'Request state',
+			text: 'Method, URL, headers, auth, and body remain visible on one surface.'
 		},
 		{
-			step: '02',
-			title: 'Send through the backend',
-			text: 'The server validates the request, checks the target, and enforces the correct guest or authenticated limits.'
+			label: 'Execution',
+			title: 'Validated runner',
+			text: 'The backend enforces destination checks, size limits, and session rules before any outbound call.'
 		},
 		{
-			step: '03',
-			title: 'Inspect the outcome',
-			text: 'Read the formatted body, the raw payload, and the response metadata without losing the request context.'
+			label: 'Response',
+			title: 'Response state',
+			text: 'Status, timing, size, headers, and body views stay attached to the request context.'
 		}
 	];
 
@@ -103,7 +103,7 @@
 	<title>Features - API Testing Kit</title>
 	<meta
 		name="description"
-		content="Explore the request builder, response viewer, collections, history, guest limits, and safety controls built into API Testing Kit."
+		content="Reference view for the request builder, response viewer, collections, history, guest limits, and safety controls in API Testing Kit."
 	/>
 </svelte:head>
 
@@ -124,10 +124,10 @@
 							Product features
 						</div>
 						<h1 class="mt-4 text-4xl font-semibold tracking-tight text-[#162117] sm:text-5xl lg:text-6xl">
-							A clear feature set for a safe API testing workspace
+							Feature reference for the shared API workspace
 						</h1>
 						<p class="mt-4 max-w-2xl text-sm leading-7 text-[#445046] sm:text-base">
-							API Testing Kit is built around one core promise: the app feels real in guest mode, but the backend keeps outbound execution controlled. The features page makes that split explicit so users understand what is available and why.
+							Request editing, response inspection, persistence, and safety controls share one product surface.
 						</p>
 					</div>
 
@@ -143,7 +143,7 @@
 							href="/docs"
 							class="rounded-full border border-[#d4ded1] bg-white px-6 py-3 font-medium text-[#162117] transition hover:bg-[#f5f3ed]"
 						>
-							Read quick start
+							Docs
 						</a>
 					</div>
 				</div>
@@ -163,10 +163,10 @@
 					<div class="max-w-3xl">
 						<p class="text-xs font-semibold uppercase tracking-[0.3em] text-[#1f7a4d]">Core capabilities</p>
 						<h2 class="mt-2 text-2xl font-semibold tracking-tight text-[#162117] sm:text-3xl">
-							The main workspace features are designed around request and response clarity
+							Core workspace capabilities
 						</h2>
 						<p class="mt-3 text-sm leading-6 text-[#445046] sm:text-base">
-							The product is intentionally narrow: it helps users build requests fast, inspect results clearly, and reuse good work without turning into a bloated proxy or admin panel.
+							The workspace stays focused on request state, response state, persistence, and safety.
 						</p>
 					</div>
 
@@ -192,16 +192,16 @@
 				<section class="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
 					<div class="rounded-[30px] border border-[#e7e3d8] bg-white/88 p-6 shadow-[0_12px_30px_rgba(21,31,23,0.05)] sm:p-7">
 						<div class="max-w-2xl">
-							<p class="text-xs font-semibold uppercase tracking-[0.3em] text-[#1f7a4d]">Request flow</p>
+							<p class="text-xs font-semibold uppercase tracking-[0.3em] text-[#1f7a4d]">Runtime surfaces</p>
 							<h2 class="mt-2 text-2xl font-semibold tracking-tight text-[#162117] sm:text-3xl">
-								Build once, send safely, then inspect the result in context
+								Request, execution, and response stay visible together
 							</h2>
 						</div>
 
 						<div class="mt-6 grid gap-4 md:grid-cols-3">
-							{#each flowSteps as item}
+							{#each runtimeCards as item}
 								<div class="rounded-[24px] border border-[#e7e3d8] bg-[#f5f3ed] p-5">
-									<p class="text-xs font-semibold uppercase tracking-[0.24em] text-[#1f7a4d]">{item.step}</p>
+									<p class="text-xs font-semibold uppercase tracking-[0.24em] text-[#1f7a4d]">{item.label}</p>
 									<h3 class="mt-3 text-base font-semibold tracking-tight text-[#162117]">{item.title}</h3>
 									<p class="mt-2 text-sm leading-6 text-[#445046]">{item.text}</p>
 								</div>
@@ -248,7 +248,7 @@
 					<div class="max-w-3xl">
 						<p class="text-xs font-semibold uppercase tracking-[0.3em] text-[#1f7a4d]">Capability split</p>
 						<h2 class="mt-2 text-2xl font-semibold tracking-tight text-[#162117] sm:text-3xl">
-							Guest mode stays real, while authenticated mode unlocks the full workspace
+							Access changes by mode, not by route
 						</h2>
 					</div>
 
@@ -280,7 +280,7 @@
 							</div>
 						</div>
 						<p class="mt-4 text-sm leading-6 text-[#445046]">
-							Collections let users group related requests into reusable sets, while history preserves recent runs and response snapshots. That keeps the product useful after the first send, not just during the first demo.
+							Collections group reusable requests, while history preserves recent runs and response snapshots.
 						</p>
 						<div class="mt-5 grid gap-3 sm:grid-cols-2">
 							<div class="rounded-[22px] border border-[#e7e3d8] bg-[#f5f3ed] p-4">
@@ -319,12 +319,12 @@
 				<section class="rounded-[30px] border border-[#dfe8dd] bg-[linear-gradient(135deg,rgba(31,122,77,0.16),rgba(255,255,255,0.96))] p-6 shadow-[0_18px_40px_rgba(21,31,23,0.08)] sm:p-8">
 					<div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 						<div class="max-w-2xl">
-							<p class="text-xs font-semibold uppercase tracking-[0.3em] text-[#1f7a4d]">Ready to use</p>
+							<p class="text-xs font-semibold uppercase tracking-[0.3em] text-[#1f7a4d]">Workspace</p>
 							<h2 class="mt-2 text-2xl font-semibold tracking-tight text-[#162117] sm:text-3xl">
-								Open the workspace and try the feature set in context
+								Open the shared workspace
 							</h2>
 							<p class="mt-3 text-sm leading-6 text-[#445046] sm:text-base">
-								The features page is not a separate product pitch. It points back to the actual app surface so the request builder, response viewer, and safety controls can be evaluated directly.
+								The same route contains the request builder, response viewer, templates, and lock states.
 							</p>
 						</div>
 

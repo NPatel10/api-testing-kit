@@ -68,12 +68,12 @@
 		title,
 		description,
 		badge = "Guest mode",
-		summary = "The real control stays visible, but the action remains disabled until sign-in.",
+		summary = "Available after sign-in.",
 		bullets = [],
 		highlights = [],
 		primaryActionLabel = "Sign in to unlock",
 		primaryActionHref = "/app",
-		secondaryActionLabel = "See docs",
+		secondaryActionLabel = "Docs",
 		secondaryActionHref = "/docs",
 		tone = "emerald",
 	}: Props = $props();
@@ -96,7 +96,7 @@
 			<div class="rounded-[20px] border border-border/70 bg-white/85 p-4 shadow-sm">
 				<div class="flex items-center gap-2">
 					<LockIcon class={cn("size-4", toneStyles[tone].icon)} />
-					<p class="text-sm font-medium text-foreground">Why this stays locked</p>
+					<p class="text-sm font-medium text-foreground">State</p>
 				</div>
 				<p class="mt-2 text-sm leading-6 text-text-body">{summary}</p>
 			</div>
@@ -140,8 +140,8 @@
 							<LockIcon class="size-5" />
 						</div>
 						<div>
-							<p class="text-sm font-semibold text-foreground">Guests can inspect the module</p>
-							<p class="text-xs leading-5 text-text-muted">The CTA and explanatory copy stay visible.</p>
+							<p class="text-sm font-semibold text-foreground">Access</p>
+							<p class="text-xs leading-5 text-text-muted">Locked in guest mode.</p>
 						</div>
 					</div>
 				</div>

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import GuestLockSurface from "./guest-lock-surface.svelte";
 
-	const bullets = [
-		"Advanced utilities remain in place for product completeness.",
-		"Code snippets, export tools, and account-level extras are gated.",
-		"Guests can discover the feature set without triggering the workflows.",
-	];
+const bullets = [
+	"Advanced utilities remain visible.",
+	"Power-user tools are gated.",
+	"Signed-in access unlocks the drawer.",
+];
 
 	const highlights = [
 		{ label: "Snippets", value: "Preview only" },
@@ -16,15 +16,15 @@
 
 <GuestLockSurface
 	eyebrow="Advanced tools"
-	title="Advanced workspace tools are intentionally gated"
-	description="The lower-priority surfaces still appear in the product so the shell feels real, but the powerful utilities stay behind authentication until the safety model is in place."
+	title="Advanced tools are gated"
+	description="Power-user tools unlock after sign-in."
 	badge="Utility drawer"
-	summary="This covers tools like snippets, history depth, environment variables, and other power-user surfaces without making the guest experience feel fake."
+	summary="Advanced tooling is available in signed-in mode."
 	{bullets}
 	{highlights}
 	primaryActionLabel="Sign in for tools"
 	primaryActionHref="/app"
-	secondaryActionLabel="Open the docs"
+	secondaryActionLabel="Docs"
 	secondaryActionHref="/docs"
 	tone="emerald"
 />

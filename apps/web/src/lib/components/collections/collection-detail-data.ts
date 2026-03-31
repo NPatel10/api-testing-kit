@@ -161,7 +161,7 @@ function buildMissingCollectionDetail(
 		source,
 		accessLabel: "Unavailable",
 		accessCopy: message,
-		heroCopy: "Return to the shared workspace or browse templates to keep moving.",
+		heroCopy: "Open the workspace or templates.",
 		collectionHref: "/app",
 		actionLinks: [
 			{ label: "Open workspace", href: "/app", variant: "default" },
@@ -188,7 +188,7 @@ function buildUnavailableCollectionDetail(collectionId: string): CollectionDetai
 		source: "live",
 		accessLabel: "Unavailable",
 		accessCopy: "The live collection detail could not be loaded right now.",
-		heroCopy: "Try the workspace again after the backend recovers, or open another collection.",
+		heroCopy: "Open another workspace route.",
 		collectionHref: "/app",
 		actionLinks: [
 			{ label: "Open workspace", href: "/app", variant: "default" },
@@ -299,7 +299,7 @@ function buildPreviewRequestItem(collectionId: string, templateSlug: string): Co
 		responseLabel: `${template.request.responseStatus} ${template.request.responseStatusText}`,
 		responseDetail: template.request.responseContentType,
 		durationLabel: `${template.request.responseTimeMs} ms`,
-		durationDetail: "Measured from the current workspace preview.",
+		durationDetail: "Preview response time.",
 		sizeLabel: template.request.responseSizeLabel,
 		sizeDetail: "Preview payload size.",
 		launchHref: buildRequestHref(collectionId, template.slug),
@@ -322,17 +322,17 @@ function buildLiveRequestItem(request: BackendSavedRequest): CollectionDetailReq
 			"Persisted request definition ready to reopen in the shared workspace.",
 		description:
 			request.description?.trim() ||
-			"Saved request metadata comes from the authenticated collections API rather than seeded template copy.",
+			"Persisted request metadata from the authenticated collections API.",
 		safeOverrides: [],
 		responseLabel: example?.responseLabel || "No stored response preview",
-		responseDetail: example?.responseDetail || "Send the request in /app to capture a fresh live response.",
+		responseDetail: example?.responseDetail || "Run the request in /app to capture a live response.",
 		durationLabel: example?.durationLabel || "Captured on send",
 		durationDetail: example?.durationLabel
-			? "Stored with the saved request preview."
-			: "Duration is recorded after the next live execution.",
+			? "Stored with the request preview."
+			: "Duration appears after the next live execution.",
 		sizeLabel: example?.sizeLabel || "Live on rerun",
 		sizeDetail: example?.sizeLabel
-			? "Stored response preview size."
+			? "Stored response size."
 			: "Payload size appears after the request runs.",
 		launchHref: `/app?request=${encodeURIComponent(request.id)}`,
 	};
@@ -348,7 +348,7 @@ function buildGroupedRequests(items: CollectionDetailRequestItem[]) {
 			label,
 			summary:
 				label === "Saved requests"
-					? "Persisted request definitions in collection order."
+					? "Persisted request definitions."
 					: `Saved requests grouped under ${label.toLowerCase()}.`,
 			requestCount: 0,
 			requests: [],
@@ -398,11 +398,11 @@ export function buildCollectionDetail(collectionId: string, mode: WorkspaceMode)
 		source: "preview",
 		accessLabel: authenticated ? "Authenticated access" : collectionScopeLabel(collection.scope),
 		accessCopy: authenticated
-			? "This preview collection can be opened from the same signed-in workspace shell."
-			: "Sign in to unlock persistence and saved execution while keeping the same collection route visible.",
+			? "This collection opens on the same signed-in workspace route."
+			: "Persistence and saved execution unlock after sign-in.",
 		heroCopy: authenticated
-			? "This route keeps the same layout while the live collection surface is loading from persistence."
-			: "The route stays visible for guests, but the preview remains intentionally constrained.",
+			? "Live collection state loads on the same route."
+			: "Guest mode keeps the route visible with constrained access.",
 		collectionHref: `/app?collection=${encodeURIComponent(collection.id)}`,
 		previewHref: buildPreviewHref(collection.id),
 		actionLinks: authenticated
@@ -422,7 +422,7 @@ export function buildCollectionDetail(collectionId: string, mode: WorkspaceMode)
 			{
 				label: "Mode",
 				value: authenticated ? "Signed in" : "Guest",
-				detail: authenticated ? "The signed-in shell keeps the same route structure." : "Guests keep the route, but not durable persistence.",
+				detail: authenticated ? "Signed-in route." : "Guest route.",
 			},
 		],
 		requestGroups,
@@ -475,8 +475,8 @@ export function buildLiveCollectionDetail(
 		status: "ready",
 		source: "live",
 		accessLabel: "Authenticated access",
-		accessCopy: "This collection is loaded from persisted data, and its saved requests reopen inside the shared workspace.",
-		heroCopy: "Review the saved requests in collection order, then jump back into /app on the exact persisted request you want to run.",
+		accessCopy: "This collection is loaded from persisted data.",
+		heroCopy: "Saved requests reopen inside the shared workspace.",
 		collectionHref: firstRequest?.launchHref || "/app",
 		actionLinks: firstRequest
 			? [

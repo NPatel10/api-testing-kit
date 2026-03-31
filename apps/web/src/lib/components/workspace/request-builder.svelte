@@ -45,12 +45,12 @@
 
 	let {
 		title = "Request builder",
-		description = "Compose, validate, and send HTTP requests from the shared workspace.",
+		description = "HTTP request editor for the shared workspace.",
 		mode = "guest",
 		request,
 		sendLabel = "Send request",
 		pending = false,
-		lockedNote = "Guests can inspect the builder, but custom targets remain locked until sign-in.",
+		lockedNote = "Custom targets remain locked in guest mode.",
 		onSend,
 		onOpenSignIn,
 		onUpgrade,
@@ -231,7 +231,7 @@
 					<div class="min-w-0 flex-1">
 						<p class="text-sm font-semibold tracking-tight">{validation?.title ?? "Request looks ready"}</p>
 						<p class="mt-1 text-xs leading-5">
-							{validation?.description ?? "The current request is valid and can move to the runner."}
+							{validation?.description ?? "Request is valid."}
 						</p>
 						{#if validation?.action}
 							<p class="mt-2 text-xs font-medium">{validation.action}</p>
@@ -312,7 +312,7 @@
 				<div class="flex items-center justify-between gap-3">
 					<div>
 						<p class="text-sm font-semibold text-foreground">Query params</p>
-						<p class="text-xs leading-5 text-text-muted">Guests can edit safe fields inside curated demos.</p>
+						<p class="text-xs leading-5 text-text-muted">Mode-aware query fields.</p>
 					</div>
 					<Button type="button" variant="outline" size="sm" class="rounded-full" onclick={addQueryParam}>
 						<CirclePlusIcon class="size-4" />
@@ -354,7 +354,7 @@
 						<CirclePlusIcon class="mt-0.5 size-4 text-primary" />
 						<div>
 							<p class="text-sm font-semibold text-foreground">No query params yet</p>
-							<p class="mt-1 text-xs leading-5 text-text-muted">Add one or keep the request clean for a simple demo run.</p>
+							<p class="mt-1 text-xs leading-5 text-text-muted">No query entries.</p>
 						</div>
 					</div>
 				{/if}
@@ -364,7 +364,7 @@
 				<div class="flex items-center justify-between gap-3">
 					<div>
 						<p class="text-sm font-semibold text-foreground">Headers</p>
-						<p class="text-xs leading-5 text-text-muted">Keep only the headers you need for the current request.</p>
+						<p class="text-xs leading-5 text-text-muted">Request headers.</p>
 					</div>
 					<Button type="button" variant="outline" size="sm" class="rounded-full" onclick={addHeader}>
 						<CirclePlusIcon class="size-4" />
@@ -406,7 +406,7 @@
 						<FileJsonIcon class="mt-0.5 size-4 text-primary" />
 						<div>
 							<p class="text-sm font-semibold text-foreground">No headers yet</p>
-							<p class="mt-1 text-xs leading-5 text-text-muted">Start with `accept` or add a custom request header.</p>
+							<p class="mt-1 text-xs leading-5 text-text-muted">No header entries.</p>
 						</div>
 					</div>
 				{/if}
@@ -416,7 +416,7 @@
 				<div class="flex items-center justify-between gap-3">
 					<div>
 						<p class="text-sm font-semibold text-foreground">Authorization</p>
-						<p class="text-xs leading-5 text-text-muted">Guests can see the control surface, but custom auth is locked.</p>
+						<p class="text-xs leading-5 text-text-muted">Mode-aware auth controls.</p>
 					</div>
 					<Badge variant={mode === "guest" ? "secondary" : "outline"}>{mode === "guest" ? "Locked in guest mode" : "Editable"}</Badge>
 				</div>
@@ -476,9 +476,9 @@
 					<div class="locked-overlay flex items-start gap-3 px-4 py-4">
 						<ShieldIcon class="mt-0.5 size-4 text-primary" />
 						<div>
-							<p class="text-sm font-semibold text-foreground">Auth controls are present, but locked</p>
+							<p class="text-sm font-semibold text-foreground">Auth controls are locked</p>
 							<p class="mt-1 text-xs leading-5 text-text-muted">
-								Guest mode keeps the control surface visible so the product feels real, while the backend rules keep it constrained.
+								Available after sign-in.
 							</p>
 						</div>
 					</div>
@@ -489,7 +489,7 @@
 				<div class="flex flex-wrap items-center justify-between gap-3">
 					<div>
 						<p class="text-sm font-semibold text-foreground">Body</p>
-						<p class="text-xs leading-5 text-text-muted">Switch between JSON, raw text, and form-urlencoded payloads.</p>
+						<p class="text-xs leading-5 text-text-muted">JSON, raw text, or form data.</p>
 					</div>
 					<div class="flex flex-wrap gap-2">
 						{#each requestBodyModes as bodyMode}
@@ -575,7 +575,7 @@
 									<FileJsonIcon class="mt-0.5 size-4 text-primary" />
 									<div>
 										<p class="text-sm font-semibold text-foreground">No form fields yet</p>
-										<p class="mt-1 text-xs leading-5 text-text-muted">Add form rows or switch back to JSON/raw if that is simpler.</p>
+										<p class="mt-1 text-xs leading-5 text-text-muted">No form entries.</p>
 									</div>
 								</div>
 							{/if}

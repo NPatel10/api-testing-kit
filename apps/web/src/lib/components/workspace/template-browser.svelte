@@ -81,12 +81,12 @@
 	};
 
 	const categoryDescriptions: Record<Exclude<TemplateCategoryKey, "all">, string> = {
-		"rest-basics": "Straightforward examples that show the core request-response loop.",
-		"auth-flows": "Login and token patterns that explain authenticated mode without ambiguity.",
-		crud: "Create, update, and delete flows for the common request lifecycle.",
-		pagination: "Sample requests that demonstrate paging, filtering, and repeated fetches.",
-		webhooks: "Curated POST targets for inbound-looking payload examples and retries.",
-		"error-handling": "Responses that surface non-200 states, blocked actions, and recovery hints.",
+		"rest-basics": "Public request presets and baseline response shapes.",
+		"auth-flows": "Authentication-oriented request presets.",
+		crud: "Write-oriented request presets.",
+		pagination: "Paged and list-oriented responses.",
+		webhooks: "Webhook-shaped request presets.",
+		"error-handling": "Blocked and failure response states.",
 	};
 
 	const categoryOrder: TemplateCategoryKey[] = [
@@ -99,8 +99,7 @@
 		"error-handling",
 	];
 
-	const allCategoryDescription =
-		"All curated examples in one place, ordered for fast browsing and quick launch handoff.";
+	const allCategoryDescription = "All templates and collections in one view.";
 
 	const defaultTemplates: WorkspaceTemplate[] = [
 		{
@@ -150,8 +149,8 @@
 			category: "auth-flows",
 			method: "POST",
 			endpoint: "https://mock.api-testing-kit.dev/auth/login",
-			summary: "A guided sign-in example that explains how tokens or session handoff would feel.",
-			notes: "Shows the boundaries between visible guest browsing and authenticated execution.",
+			summary: "Authentication-shaped request and response state.",
+			notes: "Signed-in request model preview.",
 			tags: ["session", "bearer", "sign-in"],
 			launchHref: "/app?template=auth-flow-mock",
 			previewHref: "/app?template=auth-flow-mock&mode=preview",
@@ -223,10 +222,10 @@
 		},
 		{
 			id: "auth-walkthrough",
-			name: "Auth walkthrough",
+			name: "Auth set",
 			slug: "auth-walkthrough",
 			category: "auth-flows",
-			description: "A guided login and token story for showing how guest mode hands off to signed-in mode.",
+			description: "Authentication-focused templates grouped as one collection.",
 			templateIds: ["auth-flow-mock", "error-envelope-sample"],
 			launchHref: "/app?collection=auth-walkthrough",
 			previewHref: "/app?collection=auth-walkthrough&mode=preview",
@@ -246,8 +245,8 @@
 	let {
 		templates = defaultTemplates,
 		collections = defaultCollections,
-		title = "Templates and example collections",
-		subtitle = "Curated guest-safe launches for REST basics, auth flows, CRUD, pagination, webhooks, and error handling.",
+		title = "Templates and collections",
+		subtitle = "Allowlisted presets for REST basics, auth flows, CRUD, pagination, webhooks, and error handling.",
 		launchBaseHref = "/app",
 		defaultCategory = "all",
 		class: className,
@@ -370,7 +369,7 @@
 					<div class="flex flex-wrap items-center gap-2">
 						<Badge variant="outline" class="bg-white/80">
 							<ShieldCheckIcon class="size-3.5" />
-							Guest-safe browsing
+							Shared workspace
 						</Badge>
 						<Badge variant="secondary">Templates</Badge>
 						<Badge variant="outline">Collections</Badge>
@@ -423,10 +422,10 @@
 				<div class="rounded-[18px] border border-border/70 bg-panel-soft p-4">
 					<div class="flex items-center gap-2">
 						<CompassIcon class="size-4 text-primary-green" />
-						<p class="text-sm font-semibold text-text-strong">Launch affordances</p>
+						<p class="text-sm font-semibold text-text-strong">Launch</p>
 					</div>
 					<p class="mt-2 text-sm leading-6 text-text-body">
-						Every card carries an open path into `/app`, plus a lighter preview link for quick inspection.
+						Each card includes open and preview actions for `/app`.
 					</p>
 				</div>
 			</div>
@@ -438,10 +437,8 @@
 			<CardHeader class="gap-4">
 				<div class="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
 					<div>
-						<CardTitle>Browse by category</CardTitle>
-						<CardDescription>
-							Use the category tabs to move between the core guest-safe launch paths.
-						</CardDescription>
+						<CardTitle>Categories</CardTitle>
+						<CardDescription>Templates grouped by request shape.</CardDescription>
 					</div>
 					<div class="flex flex-wrap gap-2 text-xs text-text-muted">
 						<span class="rounded-full border border-border/70 bg-panel-soft px-3 py-1">Search is live</span>
@@ -522,7 +519,7 @@
 										<CardContent class="flex flex-col items-start gap-3 p-6">
 											<p class="text-sm font-semibold text-text-strong">No templates match this category yet.</p>
 											<p class="text-sm leading-6 text-text-body">
-												Adjust the search term or switch to another category tab to continue browsing.
+												No templates match this category.
 											</p>
 										</CardContent>
 									</Card>
@@ -560,8 +557,8 @@
 				<CardHeader class="gap-3">
 					<div class="flex items-center justify-between gap-3">
 						<div>
-							<CardTitle>Example collections</CardTitle>
-							<CardDescription>Launch-ready sets grouped by the same category language as the docs.</CardDescription>
+							<CardTitle>Collections</CardTitle>
+							<CardDescription>Grouped request sets for the same workspace route.</CardDescription>
 						</div>
 						<Badge variant="secondary">{filteredCollections(activeCategory).length} visible</Badge>
 					</div>
@@ -610,23 +607,21 @@
 
 			<Card class="border-border/70 bg-gradient-to-br from-primary-green-soft/80 to-white shadow-[0_12px_30px_rgba(21,31,23,0.05)]">
 				<CardHeader class="gap-3">
-					<div class="flex items-center gap-2">
-						<CompassIcon class="size-4 text-primary-green" />
-						<CardTitle class="text-base">Guest-safe browsing rules</CardTitle>
-					</div>
-					<CardDescription>
-						The browser makes the locked model visible without letting guests swap in arbitrary target URLs.
-					</CardDescription>
-				</CardHeader>
+						<div class="flex items-center gap-2">
+							<CompassIcon class="size-4 text-primary-green" />
+							<CardTitle class="text-base">Access</CardTitle>
+						</div>
+						<CardDescription>Visible templates and mode-aware launch behavior.</CardDescription>
+					</CardHeader>
 
-				<CardContent class="space-y-3">
-					<div class="rounded-[16px] border border-border/70 bg-white px-4 py-3 text-sm leading-6 text-text-body">
-						JSONPlaceholder, GitHub public API, weather demo, and auth flow mock all stay presented as curated starts.
-					</div>
-					<div class="rounded-[16px] border border-border/70 bg-white px-4 py-3 text-sm leading-6 text-text-body">
-						Each launch path points toward `/app`, where the real workspace can apply guest restrictions or authenticated execution.
-					</div>
-				</CardContent>
+					<CardContent class="space-y-3">
+						<div class="rounded-[16px] border border-border/70 bg-white px-4 py-3 text-sm leading-6 text-text-body">
+							Guest sessions stay on allowlisted templates and collections.
+						</div>
+						<div class="rounded-[16px] border border-border/70 bg-white px-4 py-3 text-sm leading-6 text-text-body">
+							Signed-in sessions unlock the same route with validated custom execution.
+						</div>
+					</CardContent>
 			</Card>
 		</div>
 	</div>

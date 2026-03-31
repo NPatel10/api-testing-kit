@@ -107,7 +107,7 @@
 						</div>
 						<div>
 							<p class="text-sm font-semibold tracking-tight text-[#162117]">API Testing Kit</p>
-							<p class="text-xs text-[#7a847d]">Case study and engineering narrative</p>
+							<p class="text-xs text-[#7a847d]">Architecture overview</p>
 						</div>
 					</div>
 
@@ -130,16 +130,16 @@
 					<div class="space-y-6">
 						<div class="inline-flex items-center gap-2 rounded-full border border-[#d9e7d8] bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-[#1f7a4d]">
 							<span class="h-2 w-2 rounded-full bg-[#1f7a4d]"></span>
-							Engineering narrative
+							Architecture
 						</div>
 
 						<div class="space-y-4">
-							<h1 class="max-w-3xl text-4xl font-semibold tracking-tight text-[#162117] sm:text-5xl lg:text-6xl">
-								How the product stays useful for guests without becoming an open proxy
-							</h1>
-							<p class="max-w-2xl text-sm leading-7 text-[#445046] sm:text-base">
-								API Testing Kit is built around a narrow but credible idea: let visitors experience a real request-response workspace, then move signed-in users into a safer, more flexible execution model without changing the core interface.
-							</p>
+						<h1 class="max-w-3xl text-4xl font-semibold tracking-tight text-[#162117] sm:text-5xl lg:text-6xl">
+							Architecture overview for the shared request workspace
+						</h1>
+						<p class="max-w-2xl text-sm leading-7 text-[#445046] sm:text-base">
+							Frontend, backend, persistence, and safety boundaries for API Testing Kit.
+						</p>
 						</div>
 
 						<div class="grid gap-3 sm:grid-cols-3">
@@ -159,15 +159,15 @@
 					</div>
 
 					<aside class="rounded-[28px] border border-[#dfe8dd] bg-[linear-gradient(135deg,rgba(31,122,77,0.16),rgba(255,255,255,0.96))] p-6 shadow-[0_18px_40px_rgba(21,31,23,0.08)]">
-						<p class="text-xs font-semibold uppercase tracking-[0.28em] text-[#1f7a4d]">Why this exists</p>
+						<p class="text-xs font-semibold uppercase tracking-[0.28em] text-[#1f7a4d]">Scope</p>
 						<div class="mt-4 space-y-4">
 							<p class="text-sm leading-6 text-[#445046]">
-								The project needs to demonstrate frontend craft, backend judgment, and security awareness in a single product. A case study page is where those decisions become explicit.
+								The page summarizes the route model, execution path, and safety constraints behind the workspace.
 							</p>
 							<div class="rounded-[22px] border border-[#e7e3d8] bg-white/85 p-4">
 								<p class="text-sm font-semibold text-[#162117]">Source of truth</p>
 								<p class="mt-2 text-xs leading-5 text-[#7a847d]">
-									The narrative follows the execution plan, UI map, and design system docs so it stays aligned with the repo instead of drifting into generic marketing copy.
+									The page follows the repository plan, route structure, and data model used by the workspace.
 								</p>
 							</div>
 						</div>
@@ -325,7 +325,7 @@
 								href="/docs"
 								class="rounded-full border border-[#d4ded1] bg-white px-6 py-3 font-medium text-[#162117] transition hover:bg-[#f5f3ed]"
 							>
-								Read the quick start
+								Open docs
 							</a>
 						</div>
 					</div>
@@ -336,7 +336,7 @@
 				<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 					<div>
 						<p class="text-sm font-semibold text-[#162117]">API Testing Kit</p>
-						<p class="mt-1 text-xs text-[#7a847d]">Case study, architecture notes, and delivery context.</p>
+						<p class="mt-1 text-xs text-[#7a847d]">Architecture notes and delivery context.</p>
 					</div>
 
 					<div class="flex flex-wrap items-center gap-3 text-sm">

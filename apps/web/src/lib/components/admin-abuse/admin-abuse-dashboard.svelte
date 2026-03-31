@@ -301,7 +301,7 @@
 								href="/docs"
 								class="rounded-full border border-[#d9cfc5] bg-white px-6 py-3 font-medium text-[#1c1d1f] transition hover:bg-[#f5f1eb]"
 							>
-								Read quick start
+								Open docs
 							</a>
 							<a
 								href="/case-study"

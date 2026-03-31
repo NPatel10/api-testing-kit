@@ -52,18 +52,15 @@
 	const useCases = [
 		{
 			title: 'Portfolio reviews',
-			text: 'Show a real working product with guest-safe examples, clear constraints, and a visible upgrade path.',
-			steps: ['Open the app', 'Run a sample request', 'Inspect the response panel']
+			text: 'A public-facing workspace that shows real request and response surfaces without opening outbound execution.'
 		},
 		{
 			title: 'API debugging',
-			text: 'Use the same workspace for method changes, header edits, response validation, and quick retries.',
-			steps: ['Tweak the request', 'Send it again', 'Compare responses side by side']
+			text: 'One surface for request editing, execution, and response inspection.'
 		},
 		{
 			title: 'Team onboarding',
-			text: 'Keep a lightweight, teachable surface for introducing APIs without the overhead of a full platform.',
-			steps: ['Start with templates', 'Save useful requests', 'Reuse them in collections']
+			text: 'Shared templates, collections, and history inside the same product model.'
 		}
 	];
 
@@ -109,13 +106,13 @@
 			</section>
 
 			<MarketingCTABand
-				eyebrow="Ready to inspect it"
-				title="Open the app and start with a safe demo request"
-				description="The workspace is built to feel real immediately: request builder, response viewer, and clear locked states for anything the guest mode should not do."
+				eyebrow="Workspace"
+				title="Open the shared request workspace"
+				description="Request builder, response viewer, templates, and guest lock states live on the same route."
 				primaryHref="/app"
 				primaryLabel="Open /app"
 				secondaryHref="#features"
-				secondaryLabel="Review the surface"
+				secondaryLabel="View features"
 			/>
 		</main>
 

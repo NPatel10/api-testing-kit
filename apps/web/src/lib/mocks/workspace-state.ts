@@ -189,8 +189,7 @@ const promptSignIn: WorkspacePrompt = {
 	id: "sign-in-required",
 	kind: "sign-in",
 	title: "Sign in to unlock custom execution",
-	body:
-		"Guests can explore curated templates, but saved requests, history persistence, custom URLs, and environment variables stay behind sign-in.",
+	body: "Custom URLs, saved requests, history, and variables unlock after sign-in.",
 	tone: "warning",
 	action: {
 		kind: "sign-in",
@@ -202,8 +201,7 @@ const promptUpgrade: WorkspacePrompt = {
 	id: "future-upgrade",
 	kind: "upgrade",
 	title: "Higher quotas are reserved for later plan tiers",
-	body:
-		"The current product keeps monetization optional, but the state model leaves room for a future upgrade path when quota or sharing limits need to expand.",
+	body: "The quota model leaves room for higher tiers without changing the workspace surface.",
 	tone: "neutral",
 	action: {
 		kind: "upgrade",
@@ -214,9 +212,8 @@ const promptUpgrade: WorkspacePrompt = {
 const promptLearnMore: WorkspacePrompt = {
 	id: "guest-safety",
 	kind: "learn-more",
-	title: "Guest mode stays real but constrained",
-	body:
-		"Allowlisted demo endpoints, visible lock surfaces, and prompt-driven upgrades keep the public experience useful without turning the app into an open proxy.",
+	title: "Guest access stays allowlisted",
+	body: "Visible lock states and allowlisted endpoints keep guest execution constrained.",
 	tone: "positive",
 	action: {
 		kind: "learn-more",
@@ -229,7 +226,7 @@ const baseControls: readonly WorkspaceControl[] = [
 		id: "template-browser",
 		label: "Templates browser",
 		surface: "sidebar",
-		description: "Browse curated example collections and open them in the shared workspace.",
+		description: "Allowlisted templates and collections.",
 		visible: true,
 		editable: true,
 		locked: false,
@@ -239,7 +236,7 @@ const baseControls: readonly WorkspaceControl[] = [
 		id: "method-selector",
 		label: "Method selector",
 		surface: "request-builder",
-		description: "Choose from the supported HTTP methods for the current request.",
+		description: "HTTP method control.",
 		visible: true,
 		editable: true,
 		locked: false,
@@ -360,7 +357,7 @@ const baseControls: readonly WorkspaceControl[] = [
 		id: "snippet-drawer",
 		label: "Code snippets",
 		surface: "utility-drawer",
-		description: "Render curl, fetch, and Python request examples for the current request.",
+		description: "Request snippets for the current state.",
 		visible: true,
 		editable: true,
 		locked: false,
@@ -370,7 +367,7 @@ const baseControls: readonly WorkspaceControl[] = [
 		id: "advanced-tools",
 		label: "Advanced tools",
 		surface: "utility-drawer",
-		description: "Expose future assertions, environment expansion, and sharing tools.",
+		description: "Additional workspace tooling.",
 		visible: true,
 		editable: false,
 		locked: true,
@@ -399,7 +396,7 @@ const guestLockedActions: readonly WorkspaceLockedAction[] = [
 	{
 		id: "save-request",
 		label: "Save request",
-		description: "Guests can preview the control, but persistence stays locked until sign-in.",
+		description: "Persistence remains locked in guest mode.",
 		surface: "sidebar",
 		promptId: promptSignIn.id,
 		previewCopy: "Save request to a collection",
@@ -407,7 +404,7 @@ const guestLockedActions: readonly WorkspaceLockedAction[] = [
 	{
 		id: "history-persistence",
 		label: "History persistence",
-		description: "Past runs are shown as previews, not stored account history.",
+		description: "Guest history remains preview-only.",
 		surface: "sidebar",
 		promptId: promptSignIn.id,
 		previewCopy: "View saved request history",
@@ -415,7 +412,7 @@ const guestLockedActions: readonly WorkspaceLockedAction[] = [
 	{
 		id: "environment-variables",
 		label: "Environment variables",
-		description: "Variable management is visible in the shell but disabled for guests.",
+		description: "Variables are locked in guest mode.",
 		surface: "utility-drawer",
 		promptId: promptSignIn.id,
 		previewCopy: "Configure request variables",
@@ -423,7 +420,7 @@ const guestLockedActions: readonly WorkspaceLockedAction[] = [
 	{
 		id: "custom-url",
 		label: "Custom URL",
-		description: "Guest execution stays on allowlisted endpoints only.",
+		description: "Guest execution stays on allowlisted endpoints.",
 		surface: "request-builder",
 		promptId: promptSignIn.id,
 		previewCopy: "Replace the target URL",
@@ -431,7 +428,7 @@ const guestLockedActions: readonly WorkspaceLockedAction[] = [
 	{
 		id: "advanced-tools",
 		label: "Advanced tools",
-		description: "Future assertions and sharing controls remain visible but unavailable.",
+		description: "Advanced tooling remains locked.",
 		surface: "utility-drawer",
 		promptId: promptSignIn.id,
 		previewCopy: "Open advanced tooling",
@@ -442,7 +439,7 @@ const authenticatedLockedActions: readonly WorkspaceLockedAction[] = [
 	{
 		id: "higher-tier-quotas",
 		label: "Higher tier quotas",
-		description: "The base workspace keeps a small quota surface so an upgrade path can be layered later.",
+		description: "The quota model can expand without changing the workspace surface.",
 		surface: "toolbar",
 		promptId: promptUpgrade.id,
 		previewCopy: "Increase request limits",
@@ -722,8 +719,8 @@ const guestCollections: readonly WorkspaceCollectionPreview[] = [
 	},
 	{
 		id: "safety-tour",
-		title: "Safety tour",
-		description: "A collection that surfaces blocked targets, prompt copy, and allowed overrides.",
+		title: "Safety states",
+		description: "Blocked-target and constrained execution examples.",
 		scope: "guest",
 		requestCount: 2,
 		templateSlugs: ["error-envelope", "webhook-echo"],
@@ -1118,9 +1115,8 @@ export const workspaceStates: Record<WorkspaceMode, WorkspaceState> = {
 	guest: {
 		mode: "guest",
 		title: "Guest preview",
-		subtitle: "Explore the live workspace with allowlisted templates and visible lock surfaces.",
-		accessSummary:
-			"Guests can run curated examples, inspect the response viewer, and see locked controls for persistence, custom URLs, and advanced tools.",
+		subtitle: "Allowlisted templates, visible lock states, and preview history.",
+		accessSummary: "Guest mode supports allowlisted execution and preview-only persistence surfaces.",
 		prompts: [promptSignIn, promptLearnMore, promptUpgrade],
 		controls: guestControls,
 		lockedActions: guestLockedActions,
@@ -1134,9 +1130,8 @@ export const workspaceStates: Record<WorkspaceMode, WorkspaceState> = {
 	authenticated: {
 		mode: "authenticated",
 		title: "Signed-in workspace",
-		subtitle: "Use the same shell with custom URLs, saved requests, history, and stronger request limits.",
-		accessSummary:
-			"Authenticated users can edit custom targets, persist collections and history, and keep working within validated outbound request controls.",
+		subtitle: "Validated custom URLs, saved requests, history, and broader request limits.",
+		accessSummary: "Signed-in mode unlocks custom execution and persistence on the same workspace route.",
 		prompts: [promptUpgrade, promptLearnMore],
 		controls: authenticatedControls,
 		lockedActions: authenticatedLockedActions,

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import GuestLockSurface from "./guest-lock-surface.svelte";
 
-	const bullets = [
-		"Environment variables remain visible as a product concept.",
-		"Secret storage and scoped overrides are authenticated features.",
-		"Guests can still inspect where values will be applied in the request flow.",
-	];
+const bullets = [
+	"Secrets stay locked.",
+	"Scoped variables are signed-in features.",
+	"Request state remains visible.",
+];
 
 	const highlights = [
 		{ label: "Secret storage", value: "Locked" },
@@ -16,15 +16,15 @@
 
 <GuestLockSurface
 	eyebrow="Environment variables"
-	title="Env vars stay locked for guest sessions"
-	description="The surface remains part of the workspace so the product feels complete, but scoped secrets and reusable values are only available after authentication."
+	title="Env vars are locked"
+	description="Scoped secrets and reusable values unlock after sign-in."
 	badge="Variables"
-	summary="Guests can inspect where request variables belong, while authenticated users get persistent, account-scoped values and safer request composition."
+	summary="Available in signed-in sessions."
 	{bullets}
 	{highlights}
 	primaryActionLabel="Sign in for variables"
 	primaryActionHref="/app"
-	secondaryActionLabel="Read the quick start"
+	secondaryActionLabel="Docs"
 	secondaryActionHref="/docs"
 	tone="sand"
 />
